@@ -1,0 +1,33 @@
+<%- include('includes/header.ejs') %>
+<form method="post">
+  <label for="1">Имя пользователя</label>
+  <input type="text" name="username" id="1" value="<%= body.username %>" />
+  <% if (errors.username) {%>
+  <div>
+    <span class="label error"> <%= errors.username.msg %> </span>
+  </div>
+  <% } %>
+  <label for="2">Пароль</label>
+  <input type="password" name="password" id="2" value="<%= body.password %>" />
+  <% if (errors.password) {%>
+  <div>
+    <span class="label error"> <%= errors.password.msg %> </span>
+  </div>
+  <% } %>
+  <label for="3">Повтор пароля</label>
+  <input
+    type="password"
+    name="password2"
+    id="3"
+    value="<%= body.password2 %>"
+  />
+  <% if (errors.password2) {%>
+  <div>
+    <span class="label error"> <%= errors.password2.msg %> </span>
+  </div>
+  <% } %>
+  <div class="horizontal">
+    <input type="submit" value="Зарегистрироваться" />
+  </div>
+</form>
+<%- include('includes/footer.ejs') %>

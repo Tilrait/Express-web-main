@@ -1,0 +1,28 @@
+<%- include('includes/header.ejs') %>
+    <h1>Добавление дела</h1>
+    <form method="post" enctype="multipart/form-data">
+        <label for="title">Заголовок</label>
+        <input id="title" type="text" name="title" value="<%= body.title || "" %>">
+        <% if (errors.title) {%>
+            <div>
+                <span class="label error">
+                    <%= errors.title.msg %>
+                </span>
+            </div>
+        <% } %>
+        <label for="desc">Описание</label>
+        <textarea id="desc" type="text" name="desc"><%= body.desc || "" %></textarea>
+        <label for="addendum">Иллюстрация</label>
+        <input type="file" name="addendum" id="addendum" accept="image/*">
+        <% if (errors.addendum) {%>
+            <div>
+                <span class="label error">
+                    <%= errors.addendum.msg %>
+                </span>
+            </div>
+        <% } %>
+        <div style="text-align: right;">
+            <input type="submit" value="Добавить">
+        </div>
+    </form>
+<%- include('includes/footer.ejs') %>

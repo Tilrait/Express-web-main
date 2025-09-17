@@ -1,0 +1,12 @@
+<%- include('includes/header.ejs') %>
+    <h1><%= item.title %></h1>
+    <% if (item.desc) {%>
+        <p><%= item.desc %></p>
+        <% } %>
+    <% if (item.addendum) { %>
+        <img src="/uploaded/<%= item.addendum %>" alt="Картинка к делу">
+    <% } %>
+    <% if (item.createdAt) {%>
+        <p class="datetime"><%= new Date(item.createdAt).toLocaleString() %></p>
+    <% } %> 
+<%- include('includes/footer.ejs') %>

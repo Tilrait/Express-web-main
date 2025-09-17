@@ -1,0 +1,38 @@
+body {
+    padding: 2cm 5mm 0mm 5mm;    
+}
+.horizontal {
+    text-align: right;
+}
+nav .horizontal {
+    display: inline-block;
+}
+.horizontal > * {
+    display: inline;
+}
+input[name=search] {
+    width: 200px;
+}
+.heading {
+    background-image: url(/logo.png);
+    background-position: right;
+    background-repeat: no-repeat;
+}
+.datetime {
+    font-size: smaller;
+    font-style: italic;
+    text-align: right;
+}
+.copyright {
+    font-style: italic;
+    text-align: right;
+    padding: 0.5cm;
+}
+
+.addendum {
+    text-align: center;
+}
+
+.addendum img {
+    max-width: 50%;
+}

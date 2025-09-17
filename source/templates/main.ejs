@@ -1,0 +1,56 @@
+<%- include('includes/header.ejs') %>
+
+    <form method="get" class="horizontal">
+        <input type="search" name="search" value="<%= req.query.search %>">
+        <input type="submit" value="Найти">
+    </form>
+
+    <form method="post" class="horizontal">
+        <% if (req.cookies.doneAtLast == "1") { %>
+            <input type="hidden" name="done_at_last" value="0">
+            <input type="submit" value="Вывести все дела">
+        <% } else { %>
+            <input type="hidden" name="done_at_last" value="1">
+            <input type="submit" value="Вывести выполненные дела в конце и сортировать по дате">
+        <% } %>
+    </form>
+
+    <h1 class="heading">Запланированные дела</h1>
+
+    <% for (let item of todos) { %>
+        <article class="card">
+        <header>
+            <% if (item.done) {%>
+                <h2>
+                    <del>
+                        <a href="<%= req.baseUrl %>/<%= item._id %>"><%= item.title %></a>
+                    </del>
+                </h2>
+            <% } else {%> 
+                <h2>
+                    <a href="<%= req.baseUrl %>/<%= item._id %>"><%= item.title %></a>
+                </h2>
+            <% } %> 
+        </header>
+        <footer>
+            <% if (item.desc) {%>
+            <p><%= item.desc %></p>
+            <% } %>
+            <% if (item.createdAt) {%>
+                <p class="datetime"><%= new Date(item.createdAt).toLocaleString() %></p>
+            <% } %> 
+
+            <div  class="horizontal">
+                <% if (!item.done) {%>
+                <form action="<%= req.originalUrl %>/<%= item._id %>?_method=PUT" method="post">
+                    <input type="submit" value="Сделано!" class="success">
+                </form>
+                <% } %> 
+                <form action="<%= req.originalUrl %>/<%= item._id %>?_method=DELETE" method="post">
+                    <input type="submit" value="Удалить" class="warning">
+                </form>
+            </div>
+        </footer>
+        </article>
+    <% } %> 
+<%- include('includes/footer.ejs') %>

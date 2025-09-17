@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %> - <%= appTitle %></title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/picnic" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <nav>
+      <a href="/" class="brand"><span>Главная страница</span></a>
+      <input type="checkbox" id="bmenub" class="show" />
+      <label for="bmenub" class="burger pseudo button">&#9776;</label>
+      <div class="menu">
+        <% if (req.user) { %>
+        <a href="/todos"><span>Дела</span></a>
+        <a href="/todos/add" class="button">Добавить дело</a>
+        <form action="/logout" method="post" class="horizontal">
+          <input type="submit" class="warning" value="Выйти">
+        </form>
+        <form action="/delete" method="post" class="horizontal">
+          <input type="submit" class="warning" value="Удалить аккаунт">
+        </form>
+        <% } else { %>
+        <a href="/login" class="button success">Войти</a>
+        <a href="/register" class="button">Зарегистрироваться</a>
+        <% } %>
+      </div>
+    </nav>
+  </body>
+</html>
