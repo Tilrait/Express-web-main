@@ -1,15 +1,20 @@
-import { dataBase, getObjectId, saveDatabase } from "./__loaddatabase.js";
+import { ObjectId } from "mongodb";
+import { dataBase } from "./__loaddatabase.js";
+import { deleteAllItems } from "./todos.js";
 
-const users = dataBase.users;
+const users = dataBase.collection('users');
 
-export function getUser(name) {
-    return users.find((el) => el.username === name)
+export async function getUser(name) {
+    const user = await users.findOne({ username: name });
+    return user
 }
 
-export function addUser(user) {
-    user._id = getObjectId();
-    users.push(user);
-    saveDatabase();
+export async function addUser(user) {
+    await users.insertOne(user);
 }
 
 // написать модель для удаления пользователя
+export async function deleteUser(user) {
+    await deleteAllItems(user);
+    await users.deleteOne({ _id: new ObjectId(user) });
+}

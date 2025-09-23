@@ -1,6 +1,6 @@
 import { randomBytes } from "crypto";
 import { pbkdf2Promisified } from "../utility.js";
-import { addUser } from "../models/users.js";
+import { addUser, deleteUser } from "../models/users.js";
 
 export function registerPage(req, res) {
   res.render("register", { title: "Регистрация" });
@@ -21,7 +21,7 @@ export async function register(req, res) {
     password: hash,
     salt: salt,
   };
-  addUser(user);
+  await addUser(user);
   res.redirect("/");
 }
 
@@ -35,7 +35,7 @@ export function login(req, res, next) {
         next(err);
     else {
       req.session.user = {
-        id: req.__user._id,
+        id: req.__user._id.toString(),
         name: req.__user.username,
       };
       req.session.save((err) => {
@@ -66,3 +66,13 @@ export function logout(req, res, next) {
 }
 
 // Контроллер на удаление аккаунта
+export async function deleteAccountController(req, res, next) {
+  await deleteUser(req.session.user.id);
+  //TODO: 
+  next()
+}
+
+// Контроллер на подтверждение удаления с помощью пароля
+export function accountDeleteSubmit(req, res) {
+  res.render("deletePage", { title: "Удаление аккаунта"})
+}

@@ -1,41 +1,51 @@
-import { dataBase, getObjectId, saveDatabase } from "./__loaddatabase.js";
+import { dataBase } from "./__loaddatabase.js";
+import { ObjectId } from "mongodb";
 
-const todos = dataBase.todos;
+const todos = dataBase.collection("todos");
 
-export function getListTodos(user) {
-    return todos.filter((el) => el.user === user )
+export async function getList(user, doneAtLast, search) {
+    const find = { user: new ObjectId(user) };
+    if (search)
+        find.$or = [
+            { title: new RegExp(search, 'i') },
+            { desc: new RegExp(search, 'i') }
+        ];
+        const sort = doneAtLast === '1' ? { done: 1 } : {};
+        sort.createdAt = 1;
+        return await todos.find(find, { sort: sort }).toArray();
 }
 
-export function getItem(id, user) {
-    return todos.find((item) => item._id === id && item.user === user)
+export async function getItem(id, user) {
+    return await todos.findOne({
+        _id: new ObjectId(id),
+        user: new ObjectId(user)
+    });
 }
 
-export function addItem(todo) {
-    todo._id = getObjectId();
-    todos.push(todo);
-    saveDatabase();
+export async function addItem(todo) {
+    todo.user = new ObjectId(todo.user);
+    await todos.insertOne(todo)
 }
 
-function getItemIndex(id, user) {
-    return todos.findIndex((el) => el._id == id && el.user === user);
+export async function setDoneItem(id, user) {
+    const result = await todos.updateOne({
+        _id: new ObjectId(id),
+        user: new ObjectId(user)
+
+    }, { $set: { done: true } }
+    );
+    return result.acknowledged && (result.modifiedCount == 1);
 }
 
-export function setDoneItem(id, user) {
-    const index = getItemIndex(id, user);
-    if (index > -1) {
-        todos[index].done = true;
-        saveDatabase();
-        return true
+export async function deleteItem(id, user) {
+    const result = await todos.deleteOne({
+        _id: new ObjectId(id),
+        user: new ObjectId(user)
     }
-    return false
+    );
+    return result.acknowledged && (result.deletedCount == 1 );
 }
 
-export function deleteItem(id, user) {
-    const index = getItemIndex(id, user);
-    if (index > -1) {
-        todos.splice(index, 1);
-        saveDatabase()
-        return true
-    }
-    return false
+export async function deleteAllItems(user) {
+    todos.deleteMany({ user: new ObjectId(user) })
 }

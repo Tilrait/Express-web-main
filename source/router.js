@@ -5,8 +5,22 @@ import { flash } from "express-flash-message";
 
 import { detailPage, mainPage, infoPage, addPage, add, setDone, remove, setOrder } from "./controllers/todos.js";
 import { handleErrors, requestToContext, extendFlashAPI, getErrors, addendumWrapper, loadCurrentUser, isGuest, isLoggedIn } from "./middleware.js";
-import { todoV, registerV, loginV, removeAccountV } from "./validators.js";
-import { loginPage, login, register, registerPage, logout } from "./controllers/users.js";
+import {
+  todoV,
+  registerV,
+  loginV,
+  removeAccountV,
+
+} from "./validators.js";
+import {
+  loginPage,
+  login,
+  register,
+  registerPage,
+  logout,
+  deleteAccountController,
+  accountDeleteSubmit,
+} from "./controllers/users.js";
 
 const FileStore = _FileStore(session)
 
@@ -43,8 +57,16 @@ routerMain.post("/register", isGuest, registerV, handleErrors, register);
 routerMain.get("/login", isGuest, getErrors, loginPage);
 routerMain.post("/login", isGuest, loginV, handleErrors, login);
 // get на форму удаления аккаунта
+routerMain.get("/delete", isLoggedIn, getErrors, accountDeleteSubmit);
+routerMain.delete(
+  "/delete",
+  isLoggedIn,
+  removeAccountV,
+  handleErrors,
+  deleteAccountController,
+  logout
+);
 
-routerMain.delete("/delete", isLoggedIn, removeAccountV, handleErrors, deleteUser);
 routerMain.get("/", infoPage);
 
 routerMain.use(isLoggedIn);

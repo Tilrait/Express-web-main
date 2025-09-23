@@ -1,0 +1,14 @@
+<%- include('includes/header.ejs') %>
+<h1>Удаление аккаунта</h1>
+<form method="post" action="/delete?_method=DELETE">
+    <label for="1">Пароль</label>
+    <input type="password" name="password" id="1" value="<%= body.password %>" />
+    <% if (errors.password) {%>
+        <div>
+            <span class="label error"> <%= errors.password.msg %> </span>
+        </div>
+    <% } %>
+    <input type="submit" value="Подтвердить">
+</form>
+
+<%- include('includes/footer.ejs') %>
