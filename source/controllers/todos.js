@@ -86,3 +86,10 @@ export function setOrder(req, res) {
 
 
 //Создать контроллер удаления всех дел пользователя
+// export async function deletedUserItems(req, res) {
+//   await getList(user)
+//   //цикл for
+//   for () {
+    
+//   }
+// }

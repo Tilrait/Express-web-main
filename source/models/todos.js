@@ -10,9 +10,9 @@ export async function getList(user, doneAtLast, search) {
             { title: new RegExp(search, 'i') },
             { desc: new RegExp(search, 'i') }
         ];
-        const sort = doneAtLast === '1' ? { done: 1 } : {};
-        sort.createdAt = 1;
-        return await todos.find(find, { sort: sort }).toArray();
+    const sort = doneAtLast === '1' ? { done: 1 } : {};
+    sort.createdAt = 1;
+    return await todos.find(find, { sort: sort }).toArray();
 }
 
 export async function getItem(id, user) {

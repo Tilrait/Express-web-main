@@ -68,7 +68,7 @@ export function logout(req, res, next) {
 // Контроллер на удаление аккаунта
 export async function deleteAccountController(req, res, next) {
   await deleteUser(req.session.user.id);
-  //TODO: 
+  //TODO
   next()
 }
 
