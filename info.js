@@ -1319,8 +1319,8 @@ import { connect } from "mongoose";
 
 // connect(ИнтернетАдресСервераИлиБДМонго, параметры)
 
-const uri2 = "mongodb://127.0.0.1:27017";
-await connect(uri2, { dbName: "todos", autoCreate: true, autoIndex: })
+// const uri2 = "mongodb://127.0.0.1:27017";
+// await connect(uri2, { dbName: "todos", autoCreate: true, autoIndex: })
 
 // создание моделей mongoose
 // 1) Написать перечень атрибутов (имена, типы, описание индексов, мб доп. параметры атрибутов)
