@@ -44,7 +44,7 @@ routerMain.get("/login", isGuest, getErrors, loginPage);
 routerMain.post("/login", isGuest, loginV, handleErrors, login);
 // get на форму удаления аккаунта
 
-routerMain.delete("/delete", isLoggedIn, removeAccountV, handleErrors, deleteUser);
+// routerMain.delete("/delete", isLoggedIn, removeAccountV, handleErrors, deleteUser);
 routerMain.get("/", infoPage);
 
 routerMain.use(isLoggedIn);

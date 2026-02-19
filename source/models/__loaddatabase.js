@@ -1,21 +1,45 @@
-import { join } from "path";
-import { readFileSync } from "fs";
-import { writeFile } from "fs/promises";
+import { connect, Schema, model } from "mongoose";
 
-import { currentDir } from "../utility.js";
+const uri = process.env.URI || "mongodb://127.0.0.1:27017";
+const dbname = process.env.DBNAME || "todos";
 
-const dataFileName = join(currentDir, "data", "todos.json");
+const scTodo = new Schema(
+  {
+    title: String,
+    desc: String,
+    addendum: String,
+    done: Boolean,
+    createdAt: {
+      type: Date,
+      index: true,
+      default: () => new Date(),
+    },
+    user: {
+      type: Schema.Types.ObjectId,
+    }
+  },
+  {
+    versionKey: false,
+  }
+);
 
-const dataFile = readFileSync(dataFileName, "utf-8");
-const dataBase = JSON.parse(dataFile);
+scTodo.index({ done: 1, createdAt: 1 });
 
-export function saveDatabase() {
-    const s = JSON.stringify(dataBase, null, 4);
-    writeFile(dataFileName, s, "utf-8");
-}
+const scUser = new Schema(
+  {
+    username: {
+      type: String,
+      index: true,
+    },
+    password: Buffer,
+    salt: Buffer,
+  },
+  {
+    versionKey: false,
+  }
+);
 
-export function getObjectId() {
-    return (new Date().getTime()).toString();
-}
 
-export { dataBase }
+await connect(uri, { dbname: dbname });
+export const Todo = model("Todo", scTodo);
+export const User = model("User", scUser);

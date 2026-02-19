@@ -14,8 +14,8 @@ const registerV = [
     .trim()
     .notEmpty()
     .withMessage("Не указано имя пользователя")
-    .custom((value) => {
-      if (getUser(value))
+    .custom(async (value) => {
+      if (await getUser(value))
         throw new Error("Пользователь с таким именем уже есть");
       return true;
     }),
@@ -38,8 +38,8 @@ const loginV = [
     .trim()
     .notEmpty()
     .withMessage("Не указано имя пользователя")
-    .custom((value, { req }) => {
-      const user = getUser(value);
+    .custom(async (value, { req }) => {
+      const user = await getUser(value);
       if (user) {
         req.__user = user;
         return true;
@@ -55,8 +55,8 @@ const loginV = [
     .withMessage("Не указан пароль")
     .custom(async (value, { req }) => {
       if (req.__user) {
-        const savedPasswordHash = Buffer.from(req.__user.password);
-        const salt = Buffer.from(req.__user.salt);
+        const savedPasswordHash = req.__user.password;
+        const salt = req.__user.salt;
         const passwordHash = await pbkdf2Promisified(
           value,
           salt,
@@ -80,7 +80,7 @@ const removeAccountV = [
     .withMessage("Не указан пароль")
     .custom(async (value, { req }) => {
       if (req.user) {
-        const deleteInfo = getUser(req.user.username);
+        const deleteInfo = await getUser(req.user.username);
 
         const salt = Buffer.from(req.username.salt);
         const passwordHash = await pbkdf2Promisified(

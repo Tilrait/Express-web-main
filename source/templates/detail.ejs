@@ -7,6 +7,6 @@
         <img src="/uploaded/<%= item.addendum %>" alt="Картинка к делу">
     <% } %>
     <% if (item.createdAt) {%>
-        <p class="datetime"><%= new Date(item.createdAt).toLocaleString() %></p>
+        <p class="datetime"><%= item.createdAt.toLocaleString() %></p>
     <% } %> 
 <%- include('includes/footer.ejs') %>

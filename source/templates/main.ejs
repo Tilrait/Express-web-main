@@ -37,7 +37,7 @@
             <p><%= item.desc %></p>
             <% } %>
             <% if (item.createdAt) {%>
-                <p class="datetime"><%= new Date(item.createdAt).toLocaleString() %></p>
+                <p class="datetime"><%= item.createdAt.toLocaleString() %></p>
             <% } %> 
 
             <div  class="horizontal">
