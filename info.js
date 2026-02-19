@@ -1480,3 +1480,126 @@ await Todo.findByIdAndDelete({}); // как прошлый, но ищет име
 
 // Удалить несколько
 await Todo.deleteMany({});
+
+
+// ПОИСК ДОКУМЕНТОВ MONGOOSE
+.findOne(наборУсловийПоиска, переченьВыдаваемыхАтрибутов)
+
+const todo26 = await Todo.findOne(
+  { title: "Не спать" },
+  { title: 1, desc: 1, _id: 0 }
+)
+
+  
+  /* перечень выдаваемых атрибутов может выдавать какие то атрибуты 
+  со значением 1 или 0. 1 - нужно их выдать, 0 - не нужно */
+
+  .findById(id, переченьВыдаваемыхАтрибутов) // ищет по id
+const todo27 = await Todo.findById(
+  "dfyguhliohiyugtfrde",
+  {title: 1, desc: 0, _id: 0}
+)
+  
+// Пример поиска документа по дате
+const todo28 = await Todo.findOne(
+  { createdAt: { $lt: new Date(2026, 1, 19)} },
+  { title: 1, desc: 1, _id: 0}
+)
+//// !!!!!!! вернутся к 1040 строке
+
+
+// findOneAndDelete, findByIdAndDelete, findOne, 
+// findById-- > возвращают объект запроса-- > класс, Query, он обладает функционалом
+// промиса, поэтому мы его и await'им. Что из этого следует ?
+
+const prTodo = Todo.findOne( // пока что не await'ил, значит типа промис
+  { title: "не спать" },
+  { title: 1, desc: 1, _id: 0 },
+).exec();         // выполняет запрос к БД, который уже отдал мне обычный promise
+const todo29 = await prTodo;
+// и что ? это надо, когда нам обязательно почему то нужен Promise для какой то библиотеки
+
+
+// создание запроса на поиск постепенного
+//Три этапа:
+// 1) Создать запрос с набором условий поиска, 
+// который содержит только первое из условий(с помощью findOne или findById)
+const qTodo = Todo.findById(req.params.id);
+const qTodo2 = Todo.findOne();
+// В теории можно и пустой создать: const qTodo = Todo.findOne();
+// 2) Добавить в набор запроса новое условие поиска - 
+// воспользоваться методами у класса Query
+qTodo.where("user", req.user.id);
+qTodo2.where("user").equals(req.user.id);
+// 3) Можно указать дополнительные параметры запроса (например, выдаваемые атрибуты)
+qTodo2.select("title desc"); // верни только эти атрибуты
+// после этого всего:
+const todo30 = await qTodo2;
+
+// Подробнее про второе пункт:
+// Условие поиска могут быть 4 видов - условия с операторами сравнения,
+// условия с логическими операторами
+// 1) Условия простого сравнения:
+
+// 1) условия простого сравнения:
+q.where(имяАтрибута, значениеАтрибута);
+const todo31 = await Todo.findOne().where("title", "Не спать").where("done", false);
+
+// 2) условия с операторами сравнения:
+// сначала задаёт в методе where ТОЛЬКО имя утрибута, затем вызываем метод сравнения (их много)
+const todo32 = await Todo.findOne().where("title").такойМетод()
+// Какие есть методы:
+// equals - равно (по сути это то же, что и просто внутрь where записать второй аргумент)
+const todo33 = await Todo.findOne().where("title").equals("Не спать").where("done", false);
+// regex - по регулярке ищет
+// ne - не должно быть равно
+const todo34 = await Todo.findOne().where("title").ne("Не спать").where("done", false);
+// lt - (lower than) меньше чем
+const todo35 = await Todo.findOne().where("price").lt(10000).where("createdAt").lt(new Date(2026, 1, 19));
+// lte - (lower than or equals) меньше или равно чем
+// gt - больше чем
+// gte - больше или равно чем
+// in(массив) - значение атрибута должно совпадать с одним из значений в массиве
+const todo36 = await Todo.findOne().where("title").in(["Не спать", "Сходить на Lisp", "Проснуться"]);
+// nin(массив) - значение атрибута не должно совпадать с одним из значений в массиве
+
+// 3) условия с логическими операторами:
+// .and(массив условий) - И
+// создадим аналог todo35
+const todo37 = await Todo.findOne().and([{price: {$lt: 10000}}, {createdAt: {$lt: new Date(2026, 1, 19)}}])
+// как видим, не всегда он удобен
+// .or(массив) - ИЛИ
+const todo38 = await Todo.findOne().or([{price: {$lt: 10000}}, {createdAt: {$lt: new Date(2026, 1, 19)}}])
+// в этом случае найдёт дело с ценой меньше 10000 ИЛИ созданное до 19 февраля
+// .nor(массив) - исключающее ИЛИ (ТОЛЬКО одно из условий будет верно)
+
+// Подробное указание выдаваемых атрибутов:
+// есть два стула: .select(перечень) и .projection
+const todo39 = await Todo.findById("asd12eion12kdjlmn1").select("title desc createdAt")
+const todo40 = await Todo.findById("asd12eion12kdjlmn1").select(["title", "desc", "createdAt"])
+const todo41 = await Todo.findById("asd12eion12kdjlmn1").select({title: 1, desc: 1, createdAt: 1, _id: 0})
+// КСТАТИ, в таких же форматах можно указывать в findOne()
+// а что делает .projection()? То же самое, но только в последнем формате
+
+// ФИЛЬТРАЦИЯ
+// .find() - также принимает набор условий поиска, выдаёт массив нужных документов или пустой массив
+const todos4 = await Todo.find({ user: "Tilrait" });
+// набор условий поиска тоже можно формировать по цепочке (КОНСТРУИРОВАНИЕ ЗАПРОСА)
+const todos5 = await Todo.find().where("user", "Tilrait").where("createdAt").lt(new Date(2026, 1, 19)).select("title desc createdAt")
+
+// СОРТИРОВКА
+// .sort() у объекта Query (до его await)
+const todos6 = await Todo.find(чтоТоИщемКакТо).sort(параметрыСортировки)
+// параметрыСортировки быват 3 видов:
+// 1) в виде объекта, где ключ - атрибут, значение - 1 или -1 ("asc", "desc")
+const todos7 = await Todo.find(чтоТоИщемКакТо).sort({done: 1, createdAt: "desc"})
+// 2) в виде строки с именами атрибутов через пробел. По умолчанию они будт по возрастанию, если хотим по убыванию, то добавляем дефис
+const todos8 = await Todo.find(чтоТоИщемКакТо).sort("done -createdAt")
+// 3) в виде массива, каждый элемент которого - массив из двух элементов - имя атрибута и направление
+const todos9 = await Todo.find(чтоТоИщемКакТо).sort([ ["done", 1], ["createdAt", "desc"] ])
+
+// ВЫДАЧА ЧАСТИ ДОКУМЕНТОВ
+// .skip(номерПервогоДокументаДляВыдачи) - вернёт документы с определенного по счёту
+// .limit(количество) - сколько выдать
+
+// КАК ПОЛУЧИТЬ КОЛИЧЕСТВО ЭЛЕМЕНТОВ
