@@ -80,9 +80,9 @@ const removeAccountV = [
     .withMessage("Не указан пароль")
     .custom(async (value, { req }) => {
       if (req.user) {
-        const deleteInfo = await getUser(req.user.username);
-
-        const salt = Buffer.from(req.username.salt);
+        const deleteInfo = await getUser(req.user.name);
+        const savedPasswordHash = deleteInfo.password;
+        const salt = Buffer.from(deleteInfo.salt);
         const passwordHash = await pbkdf2Promisified(
           value,
           salt,

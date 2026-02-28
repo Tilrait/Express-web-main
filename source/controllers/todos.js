@@ -4,6 +4,7 @@ import {
   addItem,
   setDoneItem,
   deleteItem,
+  deleteAllUserTodosModel,
 } from "../models/todos.js";
 import createError from "http-errors";
 import { join } from "path";
@@ -23,7 +24,8 @@ export async function mainPage(req, res, next) {
       req.cookies.doneAtLast,
       req.query.search
     );
-
+    console.log(req.baseUrl);
+    console.log(req.path)
     res.render("main", {
       todos: list,
       title: "Главная",
@@ -100,4 +102,12 @@ export async function remove(req, res, next) {
 export function setOrder(req, res) {
   res.cookie("doneAtLast", req.body.done_at_last);
   res.redirect("back");
+}
+
+export async function deleteAllUserTodos(req, res, next) {
+  try {
+    await deleteAllUserTodosModel(req.session.user.id);
+  } catch (err) {
+    next(err);
+  }
 }

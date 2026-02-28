@@ -1,31 +1,48 @@
 import { Todo } from "./__loaddatabase.js";
 
-export async function getListTodos(user, doneAtLast, search) {
-    return await Todo.find({ user: user });
-    // doneAtLast и search потом доделаем
+export async function getListTodos(userId, doneAtLast, search) {
+  const qTodos = Todo.find({ user: userId });
+  if (doneAtLast === "1") {
+    qTodos.sort("done createdAt");
+  } else {
+    qTodos.sort("createdAt");
+  }
+
+  if (search)
+    qTodos.or([
+      { title: new RegExp(search, "i") },
+      { desc: new RegExp(search, "i") },
+    ]);
+    return await qTodos
 }
 
 export async function getItem(id, user) {
-    return await Todo.findOne({_id: id, user: user, })
+  return await Todo.findOne({ _id: id, user: user });
 }
 
 export async function addItem(todo) {
-    const oTodo = new Todo(todo)
-    await oTodo.save()
+  const oTodo = new Todo(todo);
+  await oTodo.save();
 }
 
 export async function setDoneItem(id, user) {
-    const oTodo = await getItem(id, user);
-    if (oTodo) {
-      oTodo.done = true;
-      await oTodo.save();
-      return true;
-    } else {
-      return false;
-    }
+  const oTodo = await getItem(id, user);
+  if (oTodo) {
+    oTodo.done = true;
+    await oTodo.save();
+    return true;
+  } else {
+    return false;
+  }
 }
 
 export async function deleteItem(id, user) {
-    return await Todo.findOneAndDelete({ _id: id, user: user });
+  return await Todo.findOneAndDelete({ _id: id, user: user });
 }
 
+export async function deleteAllUserTodosModel(userId) {
+  // найти по id пользователя все его дела, у которых есть addendum и вывести только addendum
+  // перебрать этот массив и удалить по этим меткам соответствующие файлы
+  return await Todo.deleteMany({ user: userId });
+
+}

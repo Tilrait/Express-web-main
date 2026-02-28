@@ -42,11 +42,11 @@
 
             <div  class="horizontal">
                 <% if (!item.done) {%>
-                <form action="<%= req.originalUrl %>/<%= item._id %>?_method=PUT" method="post">
+                <form action="<%= req.baseUrl %>/<%= item._id %>?_method=PUT" method="post">
                     <input type="submit" value="Сделано!" class="success">
                 </form>
                 <% } %> 
-                <form action="<%= req.originalUrl %>/<%= item._id %>?_method=DELETE" method="post">
+                <form action="<%= req.baseUrl %>/<%= item._id %>?_method=DELETE" method="post">
                     <input type="submit" value="Удалить" class="warning">
                 </form>
             </div>
