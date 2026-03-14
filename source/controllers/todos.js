@@ -24,8 +24,7 @@ export async function mainPage(req, res, next) {
       req.cookies.doneAtLast,
       req.query.search
     );
-    console.log(req.baseUrl);
-    console.log(req.path)
+
     res.render("main", {
       todos: list,
       title: "Главная",
@@ -38,7 +37,6 @@ export async function mainPage(req, res, next) {
 export async function detailPage(req, res, next) {
   try {
     const toDoObject = await getItem(req.params.id, req.user.id);
-    console.log(toDoObject);
     if (!toDoObject) {
       throw createError(404, "Запрошенное дело не существует");
     }
@@ -78,7 +76,7 @@ export async function add(req, res, next) {
 export async function setDone(req, res, next) {
   try {
     if (await setDoneItem(req.params.id, req.user.id)) {
-      res.redirect(req.baseUrl);
+      res.redirect("back");
     } else {
       throw createError(404, "Запрошенное дело не существует");
     }
@@ -93,7 +91,7 @@ export async function remove(req, res, next) {
     if (!t) throw createError(404, "Запрошенное дело не существует");
     if (t.addendum)
       await rm(join(currentDir, "storage", "uploaded", t.addendum));
-    res.redirect(req.baseUrl);
+    res.redirect("back");
   } catch (err) {
     next(err);
   }
@@ -102,12 +100,4 @@ export async function remove(req, res, next) {
 export function setOrder(req, res) {
   res.cookie("doneAtLast", req.body.done_at_last);
   res.redirect("back");
-}
-
-export async function deleteAllUserTodos(req, res, next) {
-  try {
-    await deleteAllUserTodosModel(req.session.user.id);
-  } catch (err) {
-    next(err);
-  }
 }

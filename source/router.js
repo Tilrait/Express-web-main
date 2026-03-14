@@ -25,20 +25,22 @@ const routerTodos = Router();
 routerMain.use('/uploaded', staticMiddleware("storage/uploaded"));
 routerMain.use(staticMiddleware('public'));
 routerMain.use(requestToContext);
-routerMain.use(session({
+routerMain.use(
+  session({
     store: new FileStore({
-        path: "./storage/sessions",
-        reapAsync: true,
-        reapSyncFallback: true,
-        logFn: () => {}
+      path: "./storage/sessions",
+      reapAsync: true,
+      reapSyncFallback: true,
+      logFn: () => {},
     }),
-    secret: "abcdefgh",
+    secret: process.env.SESSION_SECRET || "DEV-SECRET-CHANGAN-ME",
     resave: false,
     saveUninitialized: false,
     cookie: {
-        maxAge: 1000 * 60 * 60
-    }
-}));
+      maxAge: 1000 * 60 * 60,
+    },
+  })
+);
 routerMain.use(flash({ sessionKeyName: "flash-message" }));
 routerMain.use(extendFlashAPI);
 routerMain.use(loadCurrentUser);
@@ -56,7 +58,6 @@ routerMain.use("/todos", routerTodos);
 routerMain.post("/logout", logout);
 
 routerMain.get("/delete", getErrors, confirmDeletePage);
-
 routerMain.post("/delete", removeAccountV, handleErrors, deleteUser);
 
 // /todos routes

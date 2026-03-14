@@ -1,4 +1,7 @@
 import { Todo } from "./__loaddatabase.js";
+import { rm } from "fs/promises"
+import { currentDir } from "../utility.js";
+import { join } from "path";
 
 export async function getListTodos(userId, doneAtLast, search) {
   const qTodos = Todo.find({ user: userId });
@@ -13,7 +16,7 @@ export async function getListTodos(userId, doneAtLast, search) {
       { title: new RegExp(search, "i") },
       { desc: new RegExp(search, "i") },
     ]);
-    return await qTodos
+  return await qTodos;
 }
 
 export async function getItem(id, user) {
@@ -41,8 +44,15 @@ export async function deleteItem(id, user) {
 }
 
 export async function deleteAllUserTodosModel(userId) {
-  // найти по id пользователя все его дела, у которых есть addendum и вывести только addendum
-  // перебрать этот массив и удалить по этим меткам соответствующие файлы
+  const todos = await Todo.find({ user: userId });
+  for (let todo of todos) {
+    if (todo.addendum) {
+      try {
+        await rm(join(currentDir, "storage", "uploaded", todo.addendum));
+      } catch (err) {
+        console.error(err)
+      }
+    }
+  }
   return await Todo.deleteMany({ user: userId });
-
 }
