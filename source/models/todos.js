@@ -2,6 +2,7 @@ import { Todo } from "./__loaddatabase.js";
 import { rm } from "fs/promises"
 import { currentDir } from "../utility.js";
 import { join } from "path";
+import { DESTRUCTION } from "dns";
 
 export async function getListTodos(userId, doneAtLast, search) {
   const qTodos = Todo.find({ user: userId });
@@ -55,4 +56,33 @@ export async function deleteAllUserTodosModel(userId) {
     }
   }
   return await Todo.deleteMany({ user: userId });
+}
+
+export async function getMostActiveUsers() {
+  const result = [];
+  result.push(
+    await Todo.aggregate([
+      { $lookup: {
+        from: "users",
+        localField: "user",
+        foreignField: "_id",
+        as: "userObj",
+      }},
+      {
+        $unwind: "userObj",
+      },
+      {
+        $group: { _id: "$userObj.username", cnt: { $count: {} }},
+      },
+      {
+        $sort: { cnt: -1 },
+      },
+      {
+        $limit: 3,
+      }
+    ])
+  )
+  result.push(
+    
+  )
 }
