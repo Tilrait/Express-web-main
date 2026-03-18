@@ -4,30 +4,26 @@ import {
   addItem,
   setDoneItem,
   deleteItem,
-  deleteAllUserTodosModel,
-} from "../models/todos.js";
-import createError from "http-errors";
-import { join } from "path";
-import { rm } from "fs/promises";
-import { currentDir } from "../utility.js";
+  getMostActiveUsers,
+} from '../models/todos.js';
+import createError from 'http-errors';
+import { join } from 'path';
+import { rm } from 'fs/promises';
+import { currentDir } from '../utility.js';
 
 export function infoPage(req, res) {
-  res.render("info", {
-    title: "Информация",
+  res.render('info', {
+    title: 'Информация',
   });
 }
 
 export async function mainPage(req, res, next) {
   try {
-    let list = await getListTodos(
-      req.user.id,
-      req.cookies.doneAtLast,
-      req.query.search
-    );
+    let list = await getListTodos(req.user.id, req.cookies.doneAtLast, req.query.search);
 
-    res.render("main", {
+    res.render('main', {
       todos: list,
-      title: "Главная",
+      title: 'Главная',
     });
   } catch (err) {
     next(err);
@@ -38,10 +34,10 @@ export async function detailPage(req, res, next) {
   try {
     const toDoObject = await getItem(req.params.id, req.user.id);
     if (!toDoObject) {
-      throw createError(404, "Запрошенное дело не существует");
+      throw createError(404, 'Запрошенное дело не существует');
     }
 
-    res.render("detail", {
+    res.render('detail', {
       title: toDoObject.title,
       item: toDoObject,
     });
@@ -51,8 +47,8 @@ export async function detailPage(req, res, next) {
 }
 
 export function addPage(req, res) {
-  res.render("add", {
-    title: "Добавление дела",
+  res.render('add', {
+    title: 'Добавление дела',
   });
 }
 
@@ -60,7 +56,7 @@ export async function add(req, res, next) {
   try {
     const todo = {
       title: req.body.title,
-      desc: req.body.desc || "",
+      desc: req.body.desc || '',
       user: req.user.id,
     };
 
@@ -76,9 +72,9 @@ export async function add(req, res, next) {
 export async function setDone(req, res, next) {
   try {
     if (await setDoneItem(req.params.id, req.user.id)) {
-      res.redirect("back");
+      res.redirect('back');
     } else {
-      throw createError(404, "Запрошенное дело не существует");
+      throw createError(404, 'Запрошенное дело не существует');
     }
   } catch (err) {
     next(err);
@@ -88,16 +84,25 @@ export async function setDone(req, res, next) {
 export async function remove(req, res, next) {
   try {
     const t = await deleteItem(req.params.id, req.user.id);
-    if (!t) throw createError(404, "Запрошенное дело не существует");
-    if (t.addendum)
-      await rm(join(currentDir, "storage", "uploaded", t.addendum));
-    res.redirect("back");
+    if (!t) throw createError(404, 'Запрошенное дело не существует');
+    if (t.addendum) await rm(join(currentDir, 'storage', 'uploaded', t.addendum));
+    res.redirect('back');
   } catch (err) {
     next(err);
   }
 }
 
 export function setOrder(req, res) {
-  res.cookie("doneAtLast", req.body.done_at_last);
-  res.redirect("back");
+  res.cookie('doneAtLast', req.body.done_at_last);
+  res.redirect('back');
+}
+
+export async function mostActiveUsers(req, res) {
+  const result = await getMostActiveUsers();
+  console.log(result[0]);
+  res.render('most-active', {
+    title: 'Активные пользователи',
+    mostActiveAll: result[0],
+    mostActiveDone: result[1],
+  });
 }

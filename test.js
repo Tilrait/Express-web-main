@@ -1,5 +1,3 @@
-function G() {
-    return { result1: [1, 2, 3], result2: [4, 5, 6]}
-}
+const a = [1, 2, 3];
 
-console.log(G());
+console.log(a[0]);

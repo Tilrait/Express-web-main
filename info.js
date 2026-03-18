@@ -11,62 +11,62 @@ function logger(req, res, next) {
 
 function methodSender(req, res, next) {
   const method = req.method;
-  res.append("X-Method", method);
+  res.append('X-Method', method);
   next();
 }
 
-app.get("/user-account", (req, res, next) => {
+app.get('/user-account', (req, res, next) => {
   if (req.user) {
     next();
   } else {
-    res.redirect("/login");
+    res.redirect('/login');
   }
 });
 
 app.use(
   (req, res, next) => {
-    console.log("Первый посредник");
+    console.log('Первый посредник');
     if (что - то) {
-      next("router");
+      next('router');
     } else {
       next();
     }
   },
   (req, res, next) => {
-    console.log("Второй посредник");
+    console.log('Второй посредник');
     next();
-  }
+  },
 );
 
-app.get("/", (req, res) => {
-  console.log("Контроллер1");
+app.get('/', (req, res) => {
+  console.log('Контроллер1');
 });
-app.get("/", (req, res) => {
-  console.log("Контроллер2");
+app.get('/', (req, res) => {
+  console.log('Контроллер2');
 });
 
 app.get(
-  "/",
+  '/',
   // посредник
   (req, res, next) => {
     if (req.user) {
       next();
     } else {
-      next("route");
+      next('route');
     }
   },
   // контроллер, для авторизованных
   (req, res) => {
-    res.render("main-logged-in");
-  }
+    res.render('main-logged-in');
+  },
 );
 
 app.get(
-  "/",
+  '/',
   // контроллер, для неавторизованных
   (req, res) => {
-    res.render("main-not-logged-in");
-  }
+    res.render('main-not-logged-in');
+  },
 );
 
 app.use(logger);
@@ -93,48 +93,48 @@ app.use(getLogger());
 // а тут без
 app.use(getLogger(false));
 
-const stf1 = staticMiddleware("public", {
-  dotfiles: "ignore",
-  extensions: ["jpg", "jpeg"],
+const stf1 = staticMiddleware('public', {
+  dotfiles: 'ignore',
+  extensions: ['jpg', 'jpeg'],
   fallthrough: false,
   setHeaders: (res, path, stat) => {
-    res.set("X-LastAccessTime", stat.atime.getTime());
+    res.set('X-LastAccessTime', stat.atime.getTime());
   },
-  index: "index.html",
+  index: 'index.html',
   redirect: true,
 });
 
-const stf2 = staticMiddleware("./files/static");
+const stf2 = staticMiddleware('./files/static');
 
 // /images/bg.jpg
 app.use(stf1);
 
 // /static/styles/main.css - /styles/main.css
-app.use("/static", stf2);
+app.use('/static', stf2);
 
-app.use("/uploaded", staticMiddleware("./files/uploaded"));
+app.use('/uploaded', staticMiddleware('./files/uploaded'));
 
 export function detailPage(req, res) {
   const toDoObject = getItem(req.params.id);
 
   if (!toDoObject) {
-    const err = new Error("ошибка");
+    const err = new Error('ошибка');
     err.statusCode = 404;
     err.status = 404;
     err.headers = {
       // стандартные
-      "Content-Type": "aplication/json",
+      'Content-Type': 'aplication/json',
       // общепринятые
-      "X-CSRF-Token": "",
+      'X-CSRF-Token': '',
       // кастомные
-      "X-App-Version": "123.0",
+      'X-App-Version': '123.0',
 
-      "X-ReceivedId": req.params.id,
+      'X-ReceivedId': req.params.id,
     };
     throw err;
   }
 
-  res.render("detail", {
+  res.render('detail', {
     title: toDoObject.title,
     item: toDoObject,
   });
@@ -142,18 +142,18 @@ export function detailPage(req, res) {
 
 async function mainPage(req, res, next) {
   try {
-    const rawData = await readFile(datafileName, "utf8");
+    const rawData = await readFile(datafileName, 'utf8');
   } catch (err) {
     next(err);
   }
 }
 
-import createError from "http-errors";
+import createError from 'http-errors';
 
 // createError([<код ошибки>][,] [<текст ошибки>][,] [<параметры>])
 const err1 = createError({
   statusCode: 404,
-  message: "Запрошенное дело не существует",
+  message: 'Запрошенное дело не существует',
   headers: {
     //
   },
@@ -162,7 +162,7 @@ throw err1;
 
 function err404handler(err, req, res, next) {
   if (err.statusCode == 404) {
-    res.render("404");
+    res.render('404');
   } else {
     next(err);
   }
@@ -173,7 +173,7 @@ export function add(req, res) {
   if (req.body.title) {
     const todo = {
       title: req.body.title,
-      desc: req.body.desc || "",
+      desc: req.body.desc || '',
       createdAt: new Date().toString(),
     };
   } else {
@@ -184,18 +184,15 @@ export function add(req, res) {
   res.redirect(req.baseUrl);
 }
 
-import { query, body } from "express-validator";
+import { query, body } from 'express-validator';
 
 // query() - принимает GET-параметр, который будет валидироваться. Возвращает класс с методами
-const searchValidator = query("search").isString().trim();
-app.get("/", searchValidator, mainPage);
+const searchValidator = query('search').isString().trim();
+app.get('/', searchValidator, mainPage);
 
 // body() - принимает POST-параметр, который будет валидироваться. Возвращает класс с методами
-const toDoValidator = [
-  body("title").isString().trim().notEmpty(),
-  body("desc").isString().trim(),
-];
-app.post("/add", toDoValidator, add);
+const toDoValidator = [body('title').isString().trim().notEmpty(), body('desc').isString().trim()];
+app.post('/add', toDoValidator, add);
 
 // правила валидации
 isInt();
@@ -220,7 +217,7 @@ isPassportNumber();
 isCreditCard();
 isHexadecimal();
 isHexcolor();
-equals("Мегаласт");
+equals('Мегаласт');
 isIn([1, 2, 3]);
 exists();
 
@@ -239,26 +236,26 @@ customSanitizer((value) => Math.round(value));
 
 // Задание модификаторов
 withMessage();
-const asdas = body("title").notEmpty().with("Заголов дела не введен");
+const asdas = body('title').notEmpty().with('Заголов дела не введен');
 
 not();
-const kjhasd = body("asdasd").not().isIn([1, 2, 3]);
+const kjhasd = body('asdasd').not().isIn([1, 2, 3]);
 
 optinal();
-const asdasasd = body("title").optinal();
+const asdasasd = body('title').optinal();
 
 // if()
 
 bail();
 
-const asd = body("title").isStirng().trim().notEmpty();
+const asd = body('title').isStirng().trim().notEmpty();
 
 // на уровне приложения или роутера
-const searchValidator2 = query("search").isString().trim();
-app.get("/", searchValidator, add);
+const searchValidator2 = query('search').isString().trim();
+app.get('/', searchValidator, add);
 
 // контроллер
-import { validationResult, matchedData } from "express-validator";
+import { validationResult, matchedData } from 'express-validator';
 
 export function add(req, res) {
   const r = validationResult(req);
@@ -267,11 +264,11 @@ export function add(req, res) {
     const data = matchedData(req);
     const todo = {
       title: data.title,
-      desc: data.desc || "",
+      desc: data.desc || '',
       createdAt: new Date().toString(),
     };
     addItem(todo);
-    res.redirect("/todos");
+    res.redirect('/todos');
   } else {
     // возникла ошибка валидации
     const объектПолейСОшибками = r.mapped();
@@ -281,7 +278,7 @@ export function add(req, res) {
 }
 
 // привязка URL-валидатора к приложению
-app.param("id", idValidator);
+app.param('id', idValidator);
 
 const reId = /^\d{13}\$/;
 // сам валидатор (должна принимать ПЯТЬ параметров)
@@ -295,7 +292,7 @@ function idValidator(req, res, next, value, name) {
 
 // cookie
 // cookie-parser
-import cookieParser from "cookie-parser";
+import cookieParser from 'cookie-parser';
 
 app.use(cookieParser());
 
@@ -304,20 +301,20 @@ function someController(req, res) {
   const signedCookie = req.signedCookie;
 
   // res.cookie("имя куки", "значение куки")
-  res.cookie("doneAtLast", "true", {
-    path: "/todos",
+  res.cookie('doneAtLast', 'true', {
+    path: '/todos',
     maxAge: 1000 * 60 * 60,
     httpOnly: true,
   });
 
-  res.clearCookie("doneAtLast");
+  res.clearCookie('doneAtLast');
 }
 
 // req.params - параметры URL (/todos/12312, здесь 12312 - параметр id)
 // req.body - тело POST запроса
 // req.query - параметры запроса (/todos/12312?id=123, здесь лежал бы объект {id: 123})
 
-import session from "express-session";
+import session from 'express-session';
 
 // session(параметры)
 
@@ -332,18 +329,18 @@ import session from "express-session";
 
 app.use(
   session({
-    secret: "abcdefgh",
+    secret: 'abcdefgh',
     resave: false,
     saveUninitialized: false,
     cookie: {
       maxAge: 1000 * 60 * 60 * 24 * 7,
     },
-  })
+  }),
 );
 
 // про file-store
-import session from "express-session";
-import _FileStore from "session-file-store";
+import session from 'express-session';
+import _FileStore from 'session-file-store';
 
 // const FileStore = _FileStore(session)
 
@@ -361,15 +358,15 @@ import _FileStore from "session-file-store";
 // logFn - ф-ция для вывода сообщений ошибок и оповещения удаления (console.log() - по умолчанию)
 // fileExtension - ".json"
 
-import session from "express-session";
-import _FileStore from "session-file-store";
+import session from 'express-session';
+import _FileStore from 'session-file-store';
 
 const FileStore = _FileStore(session);
 
 app.use(
   session({
     store: new FileStore({
-      path: "./storage/sessions",
+      path: './storage/sessions',
       ttl: 7200,
       reapInterval: 7200 * 1000,
       reapAsync: true,
@@ -379,10 +376,10 @@ app.use(
       },
       logFn: () => {},
     }),
-    secret: "abcdefgh",
+    secret: 'abcdefgh',
     resave: false,
     saveUninitialized: false,
-  })
+  }),
 );
 
 // про примеры
@@ -392,7 +389,7 @@ function someController(req, res) {
   } else {
     req.session.viewCount = 1;
   }
-  res.render("view", { viewCount: req.session.viewCount });
+  res.render('view', { viewCount: req.session.viewCount });
 }
 
 // про класс Session, объект которого хранится в req.session
@@ -404,7 +401,7 @@ function someController(req, res, next) {
     if (err) {
       next(err);
     } else {
-      res.redirect("/");
+      res.redirect('/');
     }
   });
 }
@@ -422,7 +419,7 @@ function add(req, res, next) {
       if (err) {
         next(err);
       } else {
-        res.redirect("back");
+        res.redirect('back');
       }
     });
   } else {
@@ -435,18 +432,18 @@ function addPage(req, res) {
   const errors = req.session.errors || {};
   delete req.session.body;
   delete req.session.errors;
-  res.render("add", {
-    title: "",
+  res.render('add', {
+    title: '',
     body: body,
     errors: errors,
   });
 }
 
 // express-flash-message
-import { flash } from "express-flash-message";
+import { flash } from 'express-flash-message';
 
 app.use(session());
-app.use(flash({ sessionKeyName: "flash-message" }));
+app.use(flash({ sessionKeyName: 'flash-message' }));
 // sessionKeyName - имя для набора всплывающих сообщений
 
 // у объекта запроса теперь есть асинхронные методы:
@@ -454,20 +451,20 @@ app.use(flash({ sessionKeyName: "flash-message" }));
 
 async function add(req, res) {
   //
-  await req.flash("message1", "Дело добавлено");
-  res.redirect("/");
+  await req.flash('message1', 'Дело добавлено');
+  res.redirect('/');
 }
 
 // consumeFlash("имя") - возвращает массив из всех всплывающих сообщений под этим именем
 
 async function mainPage(req, res) {
-  const message = await req.consumeFlash("egor")[0];
+  const message = await req.consumeFlash('egor')[0];
 }
 
 // ________________________________________________________________________________________________
 // Выгрузка файлов
 // Библиотека mutler - для данных закодированных multipart/form-data
-import multer, { MulterError } from "multer";
+import multer, { MulterError } from 'multer';
 
 multer(параметры);
 
@@ -477,11 +474,11 @@ multer(параметры);
 // limits - правила валидации файлов
 // fileFilter - ф-ция для валидации файлов
 
-const uploadHandler = multer({ dest: "./uploads" });
+const uploadHandler = multer({ dest: './uploads' });
 
 // ПОДРОБНЕЕ ПРО storage
 // 1) DiskStorage
-import multer, { diskStorage } from "multer";
+import multer, { diskStorage } from 'multer';
 
 // diskStorage(параметры)
 
@@ -489,21 +486,21 @@ import multer, { diskStorage } from "multer";
 // если строка:
 const uploadHandler2 = multer({
   storage: diskStorage({
-    destination: "./uploads",
+    destination: './uploads',
   }),
 });
 // если функция, то она принимает 3 параметра - объект запроса, объект файла, колбэк для возврата пути или ошибки
 // колбэк - если всё ок, то первый параметром передаём null, вторым - строку
 // если не ок, то первым - ошибку, а второй необязательно, но можно null или undefined
-import { mkdirSync } from "fs";
+import { mkdirSync } from 'fs';
 const uploadHandler3 = multer({
   storage: diskStorage({
     destination: (req, file, cb) => {
       let path;
-      if (file.size > 1000000) path = "./uploads-big";
-      else path = "./uploads-small";
+      if (file.size > 1000000) path = './uploads-big';
+      else path = './uploads-small';
       try {
-        mkdirSync("d:/uploads/" + path);
+        mkdirSync('d:/uploads/' + path);
         cb(null, path);
       } catch (err) {
         cb(err);
@@ -514,11 +511,11 @@ const uploadHandler3 = multer({
 
 // 1.2 filename - ф-ция, которая формирует имя сохраняемого файла
 // пример: время.рандом.расширение
-import { extname } from "path";
+import { extname } from 'path';
 const uploadHandler4 = multer({
   storage: diskStorage({
     filename: (req, file, cb) => {
-      const name = Date.now() + "." + Math.round(Math.random() * 10000);
+      const name = Date.now() + '.' + Math.round(Math.random() * 10000);
       const ext = extname(file.originalname);
       cb(null, name + ext);
     },
@@ -526,7 +523,7 @@ const uploadHandler4 = multer({
 });
 
 // 2) MemoryStorage
-import multer, { memoryStorage } from "multer";
+import multer, { memoryStorage } from 'multer';
 
 const uploadHandler5 = multer({
   storage: memoryStorage(),
@@ -552,12 +549,12 @@ const uploadHandler6 = multer({
 
 // Если превысит, то будет ошибка класса MulterError
 // у объекта есть свойство code:
-("LIMIT_FILE_SIZE");
-("LIMIT_FILE_COUNT");
-("LIMIT_FIELD_VALUE");
-("LIMIT_FIELD_COUNT");
-("LIMIT_PART_COUNT");
-("LIMIT_FIELD_KEY");
+('LIMIT_FILE_SIZE');
+('LIMIT_FILE_COUNT');
+('LIMIT_FIELD_VALUE');
+('LIMIT_FIELD_COUNT');
+('LIMIT_PART_COUNT');
+('LIMIT_FIELD_KEY');
 
 // ПРО ФУНКЦИЮ ВАЛИДАЦИИ fileFilter
 // функция должна принимать 3 параметра - запрос, файл, колбэк для сохранения или отклонения файла
@@ -565,21 +562,17 @@ const uploadHandler6 = multer({
 // если не ок:
 // либо cb(null, false) - просто отклоним файл
 // либо cb(err, null) - укажем причину и передадим ошибку
-MulterError("код ошибки", "имя POST-параметра"); // err
+MulterError('код ошибки', 'имя POST-параметра'); // err
 
 function fileFilter(req, file, cb) {
-  if (file.mimetype == "image/jpeg") cb(null, true);
-  else cb(new MulterError("LIMIT_UNEXPECTED_FILE_FORMAT", file.fieldname));
+  if (file.mimetype == 'image/jpeg') cb(null, true);
+  else cb(new MulterError('LIMIT_UNEXPECTED_FILE_FORMAT', file.fieldname));
 }
 
 const uploadHandler7 = multer({
   // ...
   fileFilter: fileFilter,
-})// ПРО свойства объекта file
-// originalname - изначальное имя файла
-// size - размер файла в байтах
-// mimetype - MIME-type файла https://ru.wikipedia.org/wiki/Список_MIME-типов
-// fieldname - имя POST-параметра, который содержал наш файл
+})// fieldname - имя POST-параметра, который содержал наш файл // mimetype - MIME-type файла https://ru.wikipedia.org/wiki/Список_MIME-типов // size - размер файла в байтах // originalname - изначальное имя файла // ПРО свойства объекта file
 // encoding - кодировка файла
 
 // ЕСЛИ используется DiskStorage, то ещё:
@@ -600,11 +593,11 @@ const uploadHandler7 = multer({
   ...
 </form>`;
 
-import multer from "multer";
-const uploadHandler8 = multer({ dest: "./uploads" });
-const addendumUploader = uploadHandler8.single("addendum");
+import multer from 'multer';
+const uploadHandler8 = multer({ dest: './uploads' });
+const addendumUploader = uploadHandler8.single('addendum');
 
-app.post("/add", addendumUploader, add);
+app.post('/add', addendumUploader, add);
 
 // 2) array("имя параметра", ограничение) - возвращает посредник, который сохраняет любое количество файлов, которые содержатся в указанном параметре (можно ещё указать ограничение на количество файлов)
 `<form action="/add" method="post" enctype="multipart/form-data">
@@ -614,11 +607,11 @@ app.post("/add", addendumUploader, add);
   ...
 </form>`;
 
-import multer from "multer";
-const uploadHandler9 = multer({ dest: "./uploads" });
-const addendumUploader2 = uploadHandler9.array("addenda", 10);
+import multer from 'multer';
+const uploadHandler9 = multer({ dest: './uploads' });
+const addendumUploader2 = uploadHandler9.array('addenda', 10);
 
-app.post("/add", addendumUploader2, add);
+app.post('/add', addendumUploader2, add);
 
 // 3) fields("описание POST-параметров") - сохраняет все файлы из POST-параметров из описания
 // ОПИСАНИЕ - массив, каждый его элемент описывает один POST-параметр - объект, у которого есть свойства:
@@ -634,10 +627,10 @@ app.post("/add", addendumUploader2, add);
 </form>`;
 
 const addendumUploader3 = uploadHandler9.fields([
-  { name: "main_addendum", maxCount: 1 },
-  { name: "other_addenda" },
+  { name: 'main_addendum', maxCount: 1 },
+  { name: 'other_addenda' },
 ]);
-app.post("/add", addendumUploader3, add);
+app.post('/add', addendumUploader3, add);
 
 // 4) any() - возвращает посредник, который будет сохранять прям ВСЕ файлы
 
@@ -652,7 +645,7 @@ app.post("/add", addendumUploader3, add);
 
 const loginHandler = uploadHandler9.none();
 
-app.post("/login", loginHandler, loggingIn);
+app.post('/login', loginHandler, loggingIn);
 
 // ВТОРОЙ СПОСОБ ВЫЗВАТЬ такой посредник:
 function add(req, res) {
@@ -718,8 +711,8 @@ function add(req, res) {
 }
 
 // Если вдруг мы захотели сохранить файл из MemoryStorage на диск:
-import { writeFile } from "fs/promises";
-import routerMain from "./source/router";
+import { writeFile } from 'fs/promises';
+import routerMain from './source/router';
 
 function getFileName(file) {
   // генерируем имя файла
@@ -735,16 +728,16 @@ async function add(req, res) {
 
 // 1) С помощью staticMiddleware
 // Обеспечиваем обработку выгруженных файлов
-routerMain.use("/uploaded", staticMiddleware("uploaded"));
+routerMain.use('/uploaded', staticMiddleware('uploaded'));
 // Обеспечиваем обработку обычных статических файлов
-routerMain.use(staticMiddleware("public"));
+routerMain.use(staticMiddleware('public'));
 
 // 2) Получить из контроллера
-app.get("/uploaded/:filename", getFile);
+app.get('/uploaded/:filename', getFile);
 
 // для отправки файлов из контроллера можно применить следующие методы ответа:
 // 1) sendFile() - отправляет в составе ответа файл по указанному пути.
-sendFile("путь к файлу", "параметры", "колбэк");
+sendFile('путь к файлу', 'параметры', 'колбэк');
 
 // параметры (необязательные)
 // root - путь к папке от которой отсчитывать относительные пути
@@ -765,7 +758,7 @@ function getFile(req, res) {
 // 2) attachment("имя файла") - добавляет в заголовки ответа сохранить файл на диске
 function getFileToSave(req, res) {
   res.attachment(req.params.filename);
-  res.sendFile(req.params.filename, { root: "./uploads" });
+  res.sendFile(req.params.filename, { root: './uploads' });
 }
 
 // 3) download("путь к файлу", "имя файла", параметры, колбэк) - объединение предыдущего в одно
@@ -793,17 +786,10 @@ function getFileToSave(req, res) {
 // Что происходит при выходе? Понятно
 
 // ХЕШИРОВАНИЕ
-import { pbkdf2, randomBytes } from "crypto";
+import { pbkdf2, randomBytes } from 'crypto';
 // import { pbkdf2Sync } from "crypto";
 
-pbkdf2(
-  хешируемый_пароль,
-  соль,
-  количество_итераций,
-  длина_хеша,
-  обозначение_алгоритма,
-  колбэк
-);
+pbkdf2(хешируемый_пароль, соль, количество_итераций, длина_хеша, обозначение_алгоритма, колбэк);
 
 // хешируемый_пароль - пароль, который ввели и пытаемся превратить в хеш
 // соль - строка, которая дописывается к паролю для создания более сложного хеша
@@ -812,9 +798,9 @@ pbkdf2(
 // обозначение_алгоритма - sha256, sha384, sha512
 // колбэк - функция, которая сработает после вычисления, принимает 2 параметра
 
-import { pbkdf2 } from "crypto";
+import { pbkdf2 } from 'crypto';
 
-pbkdf2("password", "abcdefgh", 100000, 32, "sha256", (err, hash) => {
+pbkdf2('password', 'abcdefgh', 100000, 32, 'sha256', (err, hash) => {
   if (err) {
     // обрабатываем
   } else {
@@ -823,32 +809,32 @@ pbkdf2("password", "abcdefgh", 100000, 32, "sha256", (err, hash) => {
 });
 
 // для соли
-import { pbkdf2, randomBytes } from "crypto";
+import { pbkdf2, randomBytes } from 'crypto';
 
 const salt = randomBytes(32);
-pbkdf2("password", salt, "...");
+pbkdf2('password', salt, '...');
 
 // а если указать второй аргумент:
 randomBytes(32, (err, salt) => {
   if (err) {
   } else {
-    pbkdf2("password", salt, "...");
+    pbkdf2('password', salt, '...');
   }
 });
 
 // для сверки двух хешей пароля:
-import { timingSafeEqual } from "crypto";
+import { timingSafeEqual } from 'crypto';
 
 timingSafeEqual(хеш1, хеш2);
 
 // ПРОМИСИФИКАЦИЯ
-import { promisify } from "util";
+import { promisify } from 'util';
 
 const pbkdf2Promisified = promisify(pbkdf2);
 
 async function register(req, res) {
   // ...
-  const hash = await pbkdf2Promisified("password", salt, "...");
+  const hash = await pbkdf2Promisified('password', salt, '...');
   // ...
 }
 
@@ -927,22 +913,22 @@ async function register(req, res) {
 5) Удаление - удалить документ по какому-то условию
 
 */
-import { FindCursor, MongoClient, ObjectId } from "mongodb";
-import { FindCursor, MongoClient, ObjectId } from "mongodb";
+import { FindCursor, MongoClient, ObjectId } from 'mongodb';
+import { FindCursor, MongoClient, ObjectId } from 'mongodb';
 
-const uri = "mongodb://127.0.0.1:27017/";
-const connection = new MongoClient(uri, { appname: "test" });
+const uri = 'mongodb://127.0.0.1:27017/';
+const connection = new MongoClient(uri, { appname: 'test' });
 
-const dTodos = connection.db("todos");
-const cTodos = dTodos.collection("todos");
+const dTodos = connection.db('todos');
+const cTodos = dTodos.collection('todos');
 // MongoClient("адрес сервера MongoDB", необязательные_параметры)
 // mongodb://127.0.0.1:27017
 
 // Добавление документов в коллекцию
 // 1) Добавить один документ
 const result = await cTodos.insertOne({
-  title: "Изучить MongoDB",
-  desc: "Важная инфа про базы данных",
+  title: 'Изучить MongoDB',
+  desc: 'Важная инфа про базы данных',
   createdAt: new Date(),
 });
 
@@ -959,22 +945,22 @@ if (result.acknowledged) {
 
 // 2) Добавление нескольких документов
 // cTodos.insertMany(массив_документов)
-const dProducts = connection.db("products");
-const cProducts = connection.collection("products");
+const dProducts = connection.db('products');
+const cProducts = connection.collection('products');
 const resultProdAdd = await cProducts.insertMany([
   {
-    title: "Лопата",
-    desc: "Новая крутая деревянная",
+    title: 'Лопата',
+    desc: 'Новая крутая деревянная',
     price: 300,
   },
   {
-    title: "Дом",
-    desc: "Новый крутой деревянный",
+    title: 'Дом',
+    desc: 'Новый крутой деревянный',
     price: 100000000,
   },
   {
-    title: "Холодильник",
-    desc: "Яйца мои хотите кушац?",
+    title: 'Холодильник',
+    desc: 'Яйца мои хотите кушац?',
     price: 5000,
   },
 ]);
@@ -988,7 +974,7 @@ if (resultProdAdd.acknowledged) {
 // Поиск документа
 // findOne(набор_условий_поиска, необязательные_параметры)
 
-const todo = await cTodos.findOne({ title: "Изучить MongoDB" });
+const todo = await cTodos.findOne({ title: 'Изучить MongoDB' });
 // Результат:
 // {
 //   _id: new ObjectId("12h3jg12h3g12hj312hj3g"),
@@ -1013,17 +999,17 @@ const product = await cProducts.findOne({ price: { $lt: 1000 } });
 // в качестве сравниваемого значения можно использовать и регулярки
 
 // Поиск документа по объектному идентификатору
-import { ObjectId } from "mongodb";
+import { ObjectId } from 'mongodb';
 
 const todo2 = await cTodos.findOne({
-  _id: new ObjectId("12h3jg12h3g12hj312hj3g"),
+  _id: new ObjectId('12h3jg12h3g12hj312hj3g'),
 });
 
 // Условия, использующие операторы сравнения
 // атрибут: { оператор_сравнения: сравниваемое_значение }
 // Операторы сравнения:
 // 1) $eq - значение атрибута должно быть равно сравниваемому значению
-const todo11 = await cTodos.findOne({ title: { $eq: "Изучить MongoDB" } });
+const todo11 = await cTodos.findOne({ title: { $eq: 'Изучить MongoDB' } });
 // 2) $regex - значение атрибута должно совпадать с регуляркой
 const todo12 = await cTodos.findOne({ desc: { $regex: /про/i } });
 // 3) $ne - значение атрибута НЕ должно быть равно сравниваемому или указанный атрибут вообще отсутствует
@@ -1034,7 +1020,7 @@ const product14 = await cProducts.findOne({ price: { $lt: 1000 } });
 // 6) $gt - значение атрибута должно быть БОЛЬШЕ сравниваемого значения >
 // 7) $gte - значение атрибута должно быть БОЛЬШЕ ИЛИ РАВНО сравниваемого значения >=
 // 8) $in - значение атрибута должно совпасть с каким-нибудь из массива сравниваемых
-const todo15 = await cTodos.findOne({ title: { $in: ["Express", "MongoDB"] } });
+const todo15 = await cTodos.findOne({ title: { $in: ['Express', 'MongoDB'] } });
 // 9) $nin - значение атрибута НЕ должно совпасть с каким-нибудь из массива сравниваемых или указанный атрибут вообще отсутствует
 
 // _____________________________________________________________________________________
@@ -1048,11 +1034,11 @@ const todo15 = await cTodos.findOne({ title: { $in: ["Express", "MongoDB"] } });
 
 // 1) $and - И
 const todo16_1 = await cTodos.findOne({
-  $and: [{ title: "Express" }, { createdAt: "12.01.2024" }],
+  $and: [{ title: 'Express' }, { createdAt: '12.01.2024' }],
 });
 const todo16_2 = await cTodos.findOne({
-  title: "Express",
-  createdAt: "12.01.2024",
+  title: 'Express',
+  createdAt: '12.01.2024',
 });
 
 // 2) $or - ИЛИ
@@ -1073,17 +1059,14 @@ const todo19 = await cTodos.findOne({ price: { $not: { $gt: 500000 } } });
 
 // найти первый документ у которого title - дом ИЛИ лопата при этом цена не меньше 1000000
 const todo20 = await cTodos.findOne({
-  $and: [
-    { $or: [{ title: "Дом" }, { title: "Лопата" }] },
-    { price: { $gte: 1000000 } },
-  ],
+  $and: [{ $or: [{ title: 'Дом' }, { title: 'Лопата' }] }, { price: { $gte: 1000000 } }],
 });
 
 // _______________________________________________________________________________
 // КАК ВЫВОДИТЬ ОПРЕДЕЛЕННЫЕ АТРИБУТЫ ДОКУМЕНТА
 const todo21 = await cTodos.findOne(
-  { title: "Изучить Express" },
-  { projection: { title: 1, desc: 1 } }
+  { title: 'Изучить Express' },
+  { projection: { title: 1, desc: 1 } },
 );
 /*
 {
@@ -1094,8 +1077,8 @@ const todo21 = await cTodos.findOne(
 */
 
 const todo22 = await cTodos.findOne(
-  { title: "Изучить Express" },
-  { projection: { title: 1, desc: 1, _id: 0 } }
+  { title: 'Изучить Express' },
+  { projection: { title: 1, desc: 1, _id: 0 } },
 );
 /*
 {
@@ -1105,8 +1088,8 @@ const todo22 = await cTodos.findOne(
 */
 
 const todo23 = await cTodos.findOne(
-  { title: "Изучить Express" },
-  { projection: { createdAt: 0, desc: 0 } }
+  { title: 'Изучить Express' },
+  { projection: { createdAt: 0, desc: 0 } },
 );
 /*
 {
@@ -1120,21 +1103,15 @@ const todo23 = await cTodos.findOne(
 const id = todo23._id.toString();
 
 // Как работать с паролями и всем, что хранится классом Buffer (на самом деле хранится в объекте класса Binary, у которого есть свойство .buffer, которое даст нам то, что надо)
-const cUsers = dTodos.collection("users");
+const cUsers = dTodos.collection('users');
 const user = await cUsers.findOne({ username: req.body.username });
 const password = user.password.buffer;
 const salt2 = user.salt.buffer;
-const hashed = await pbkdf2Promisified(
-  req.body.password,
-  salt2,
-  100000,
-  32,
-  "sha256"
-);
+const hashed = await pbkdf2Promisified(req.body.password, salt2, 100000, 32, 'sha256');
 
 if (!timingSafeEqual(hashed, password)) {
   // не совпали
-  throw new Error("Неправильный пароль");
+  throw new Error('Неправильный пароль');
 }
 
 const title23 = todo23.title;
@@ -1204,34 +1181,34 @@ updateOne(набор_условий, изменения);
 // изменения - набор операций над какими-то атрибутами
 // 1) $set
 await cTodos.updateOne(
-  { title: "Лопата" },
-  { $set: { price: 20000000, desc: "Самая крутая лопата (с RTX)" } }
+  { title: 'Лопата' },
+  { $set: { price: 20000000, desc: 'Самая крутая лопата (с RTX)' } },
 );
 
 // 2) $inc
-await cTodos.updateOne({ title: "Лопата" }, { $inc: { price: 5000 } });
+await cTodos.updateOne({ title: 'Лопата' }, { $inc: { price: 5000 } });
 // увеличили цену на 5000 (или создали равную 5к, если цены не было)
 
 // 3) $min
-await cTodos.updateOne({ title: "Лопата" }, { $min: { price: 5000 } });
+await cTodos.updateOne({ title: 'Лопата' }, { $min: { price: 5000 } });
 // занесёт в цену значение 5000, если текущее значение БОЛЬШЕ, чем 5000
 
 // 4) $max - понятно
 
 // 5) $mul
-await cTodos.updateOne({ title: "Лопата" }, { $mul: { price: 2 } });
+await cTodos.updateOne({ title: 'Лопата' }, { $mul: { price: 2 } });
 // умножит цену на 2
 
 // 6) $currentDate
-await cTodos.updateOne({ title: "Лопата" }, { $currentDate: { date: true } });
+await cTodos.updateOne({ title: 'Лопата' }, { $currentDate: { date: true } });
 // занесёт в атрибут date текущую дату и время
 
 // 7) $rename
-await cTodos.updateOne({ title: "Лопата" }, { $rename: { date: "Хе_хе" } });
+await cTodos.updateOne({ title: 'Лопата' }, { $rename: { date: 'Хе_хе' } });
 // переименует атрибут date на Хе_хе
 
 // 8) $unset
-await cTodos.updateOne({ title: "Лопата" }, { $unset: { date: "" } });
+await cTodos.updateOne({ title: 'Лопата' }, { $unset: { date: '' } });
 
 // КРОМЕ ТОГО, ЭТОТ МЕТОД updateOne ВОЗВРАЩАЕТ ОБЪЕКТ:
 const result2 = await cTodos.updateOne({});
@@ -1246,7 +1223,7 @@ result2.modifiedCount; // кол-во измененных документов
 // КАК ИЗМЕНИТЬ НЕСКОЛЬКО ДОКУМЕНТОВ?
 cTodos.updateMany(параметры_поиска, исправления);
 
-await cTodos.updateMany({ title: "Лопаты" }, { $set: { price: 3000000 } });
+await cTodos.updateMany({ title: 'Лопаты' }, { $set: { price: 3000000 } });
 // обновит все лопаты
 
 // КАК УДАЛЯТЬ ИЗ КОЛЛЕКЦИИ ДОКУМЕНТЫ
@@ -1257,7 +1234,7 @@ cTodos.deleteOne(набор_условий);
 cTodos.deleteMany(набор_условий);
 
 // Mongoose
-import { connect } from "mongoose";
+import { connect } from 'mongoose';
 
 // connect(ИнтернетАдресСервераИлиБДМонго, параметры)
 
@@ -1292,7 +1269,7 @@ const alTodo2 = {
 // 3 вида:
 // 1) Классы JS (Number, Date, String, Object ...)
 // 2) Классы из Mongoose
-import { Schema } from "mongoose";
+import { Schema } from 'mongoose';
 
 const alTodo3 = {
   title: Schema.Types.String,
@@ -1302,9 +1279,9 @@ const alTodo3 = {
 
 // 3) Строки с именование типов из JS
 const alTodos4 = {
-  title: "String",
-  desc: "String",
-  createdAt: "Date",
+  title: 'String',
+  desc: 'String',
+  createdAt: 'Date',
 };
 
 // Описание индексов
@@ -1317,7 +1294,7 @@ const alTodos5 = {
 // Какие еще бывают параметры для атрибутовЖ
 // default - Значение по умолчанию, если не был указан такой атрибут при добавлении документа
 const alTodos6 = {
-  title: { type: String, default: () => "Дефолтное значение" }, // создать индекс по возрастанию
+  title: { type: String, default: () => 'Дефолтное значение' }, // создать индекс по возрастанию
   desc: { type: String },
   createdAt: { type: Date },
 };
@@ -1339,7 +1316,7 @@ const alTodo7 = {
 const altodos8 = {
   t: {
     type: String,
-    alias: "title",
+    alias: 'title',
   },
 };
 // Ищем дело
@@ -1379,7 +1356,7 @@ new Schema(переченьАтрибутов, параметры);
 // true - сохраняй времена в автоматические поля createdAt и updatedAt
 // false - не записывай никаких временных меток
 // Объект со свойствами createdAt - имя атрибута для сохранения времени создания, updatedAt - аналогично, currentTime - функция для вычисления времени (по умолчанию false).
-import { Schema } from "mongoose";
+import { Schema } from 'mongoose';
 
 const alTodos = {}; // тут типа атрибутыы
 const scTodo = new Schema(alTodoN, {
@@ -1401,12 +1378,12 @@ scTodo.index({
 
 // Виртуальный атрибут - это атрибут который не хранится не документе а вычисляется на основе других атрибутов.
 scTodo
-  .virtual("IsDone") // возвращает пустой виртуальный атрибут
+  .virtual('IsDone') // возвращает пустой виртуальный атрибут
   .get(() => {
-    return this.done ? "Выполнено" : undefined;
+    return this.done ? 'Выполнено' : undefined;
   })
   .set((val) => {
-    this.done = val == "Выполнено";
+    this.done = val == 'Выполнено';
 
     /* if (val == "выполнено") {
           this.done = true
@@ -1417,49 +1394,48 @@ scTodo
 
 // ПРО МОДЕЛИ
 
-import { model } from "mongoose";
+import { model } from 'mongoose';
+import { User } from './source/models/__loaddatabase';
 
-const Todo = model("Todo", scTodo, { collection: "" }); // Название модели и схема
+const Todo = model('Todo', scTodo, { collection: '' }); // Название модели и схема
 
 // ПРАВКА, ДОБАВЛЕНИЕ, УДАЛЕНИЕ ЭЛЕМЕНТОВ В MONGOOSE
-  
+
 // ДОБАВЛЕНИЕ
 // надо выполнить 2 действия: создать объект документа и сохранить его в коллекцию
 const todo24 = new Todo({
-  title: "Новое дело",
-  desc: "Самое главное дело"
-})
+  title: 'Новое дело',
+  desc: 'Самое главное дело',
+});
 
 await todo24.save({
   timestamps: false,
-
 }); // Асинхронный, можно указать какие то доп параметры
 
 // Добавить несколько
 Todo.insertMany([
   {
-    title: "Проснуться",
-    desc: "Если не выполнено прошлое"
+    title: 'Проснуться',
+    desc: 'Если не выполнено прошлое',
   },
   {
-    title: "Понять панду",
-    desc: "Сложно, но можно"
-  }
-])
+    title: 'Понять панду',
+    desc: 'Сложно, но можно',
+  },
+]);
 
 // Правка одного
 // 1) как в монгоДБ библиотеке
 // 2) Магнуст, его и покажу
 
 const todo25 = await Todo.findOne({
-  title: "Ледниковый период"
-})
+  title: 'Ледниковый период',
+});
 
-todo25.desc = "Заснул";
+todo25.desc = 'Заснул';
 todo25.done = true;
 
 await todo25.save();
-
 
 // Правка нескольких
 
@@ -1470,69 +1446,59 @@ await Todo.updateMany(НаборФильтраций, исправления, м
 
 // Удаление одного
 await Todo.deleteOne({
-  title: "Не спать"
-})
+  title: 'Не спать',
+});
 
 await Todo.findOneAndDelete({}); // тоже самое но еще возвращает сам найденный документ
 
-
-await Todo.findByIdAndDelete({}); // как прошлый, но ищет именно по id 
+await Todo.findByIdAndDelete({}); // как прошлый, но ищет именно по id
 
 // Удалить несколько
 await Todo.deleteMany({});
 
-
 // ПОИСК ДОКУМЕНТОВ MONGOOSE
 // .findOne(наборУсловийПоиска, переченьВыдаваемыхАтрибутов)
 
-const todo26 = await Todo.findOne(
-  { title: "Не спать" },
-  { title: 1, desc: 1, _id: 0 }
-)
+const todo26 = await Todo.findOne({ title: 'Не спать' }, { title: 1, desc: 1, _id: 0 })
 
-  
   /* перечень выдаваемых атрибутов может выдавать какие то атрибуты 
   со значением 1 или 0. 1 - нужно их выдать, 0 - не нужно */
 
-  .findById(id, переченьВыдаваемыхАтрибутов) // ищет по id
-const todo27 = await Todo.findById(
-  "dfyguhliohiyugtfrde",
-  {title: 1, desc: 0, _id: 0}
-)
-  
+  .findById(id, переченьВыдаваемыхАтрибутов); // ищет по id
+const todo27 = await Todo.findById('dfyguhliohiyugtfrde', { title: 1, desc: 0, _id: 0 });
+
 // Пример поиска документа по дате
 const todo28 = await Todo.findOne(
-  { createdAt: { $lt: new Date(2026, 1, 19)} },
-  { title: 1, desc: 1, _id: 0}
-)
+  { createdAt: { $lt: new Date(2026, 1, 19) } },
+  { title: 1, desc: 1, _id: 0 },
+);
 //// !!!!!!! вернутся к 1040 строке
 
-
-// findOneAndDelete, findByIdAndDelete, findOne, 
+// findOneAndDelete, findByIdAndDelete, findOne,
 // findById-- > возвращают объект запроса-- > класс, Query, он обладает функционалом
 // промиса, поэтому мы его и await'им. Что из этого следует ?
 
-const prTodo = Todo.findOne( // пока что не await'ил, значит типа промис
-  { title: "не спать" },
+const prTodo = Todo.findOne(
+  // пока что не await'ил, значит типа промис
+  { title: 'не спать' },
   { title: 1, desc: 1, _id: 0 },
-).exec();         // выполняет запрос к БД, который уже отдал мне обычный promise
+).exec(); // выполняет запрос к БД, который уже отдал мне обычный promise
 const todo29 = await prTodo;
 // и что ? это надо, когда нам обязательно почему то нужен Promise для какой то библиотеки
 
-
 // создание запроса на поиск постепенного
 //Три этапа:
-// 1) Создать запрос с набором условий поиска, 
+// 1) Создать запрос с набором условий поиска,
 // который содержит только первое из условий(с помощью findOne или findById)
 const qTodo = Todo.findById(req.params.id);
 const qTodo2 = Todo.findOne();
 // В теории можно и пустой создать: const qTodo = Todo.findOne();
-// 2) Добавить в набор запроса новое условие поиска - 
+// 2) Добавить в набор запроса новое условие поиска -
 // воспользоваться методами у класса Query
-qTodo.where("user", req.user.id);
-qTodo2.where("user").equals(req.user.id);
+qTodo.where('user', req.user.id);
+qTodo2.where('user').equals(req.user.id);
 // 3) Можно указать дополнительные параметры запроса (например, выдаваемые атрибуты)
-qTodo2.select("title desc"); // верни только эти атрибуты
+qTodo2.select('title desc'); // верни только эти атрибуты
 // после этого всего:
 const todo30 = await qTodo2;
 
@@ -1543,60 +1509,84 @@ const todo30 = await qTodo2;
 
 // 1) условия простого сравнения:
 q.where(имяАтрибута, значениеАтрибута);
-const todo31 = await Todo.findOne().where("title", "Не спать").where("done", false);
+const todo31 = await Todo.findOne().where('title', 'Не спать').where('done', false);
 
 // 2) условия с операторами сравнения:
 // сначала задаёт в методе where ТОЛЬКО имя утрибута, затем вызываем метод сравнения (их много)
-const todo32 = await Todo.findOne().where("title").такойМетод()
+const todo32 = await Todo.findOne().where('title').такойМетод();
 // Какие есть методы:
 // equals - равно (по сути это то же, что и просто внутрь where записать второй аргумент)
-const todo33 = await Todo.findOne().where("title").equals("Не спать").where("done", false);
+const todo33 = await Todo.findOne().where('title').equals('Не спать').where('done', false);
 // regex - по регулярке ищет
 // ne - не должно быть равно
-const todo34 = await Todo.findOne().where("title").ne("Не спать").where("done", false);
+const todo34 = await Todo.findOne().where('title').ne('Не спать').where('done', false);
 // lt - (lower than) меньше чем
-const todo35 = await Todo.findOne().where("price").lt(10000).where("createdAt").lt(new Date(2026, 1, 19));
+const todo35 = await Todo.findOne()
+  .where('price')
+  .lt(10000)
+  .where('createdAt')
+  .lt(new Date(2026, 1, 19));
 // lte - (lower than or equals) меньше или равно чем
 // gt - больше чем
 // gte - больше или равно чем
 // in(массив) - значение атрибута должно совпадать с одним из значений в массиве
-const todo36 = await Todo.findOne().where("title").in(["Не спать", "Сходить на Lisp", "Проснуться"]);
+const todo36 = await Todo.findOne()
+  .where('title')
+  .in(['Не спать', 'Сходить на Lisp', 'Проснуться']);
 // nin(массив) - значение атрибута не должно совпадать с одним из значений в массиве
 
 // 3) условия с логическими операторами:
 // .and(массив условий) - И
 // создадим аналог todo35
-const todo37 = await Todo.findOne().and([{price: {$lt: 10000}}, {createdAt: {$lt: new Date(2026, 1, 19)}}])
+const todo37 = await Todo.findOne().and([
+  { price: { $lt: 10000 } },
+  { createdAt: { $lt: new Date(2026, 1, 19) } },
+]);
 // как видим, не всегда он удобен
 // .or(массив) - ИЛИ
-const todo38 = await Todo.findOne().or([{price: {$lt: 10000}}, {createdAt: {$lt: new Date(2026, 1, 19)}}])
+const todo38 = await Todo.findOne().or([
+  { price: { $lt: 10000 } },
+  { createdAt: { $lt: new Date(2026, 1, 19) } },
+]);
 // в этом случае найдёт дело с ценой меньше 10000 ИЛИ созданное до 19 февраля
 // .nor(массив) - исключающее ИЛИ (ТОЛЬКО одно из условий будет верно)
 
 // Подробное указание выдаваемых атрибутов:
 // есть два стула: .select(перечень) и .projection
-const todo39 = await Todo.findById("asd12eion12kdjlmn1").select("title desc createdAt")
-const todo40 = await Todo.findById("asd12eion12kdjlmn1").select(["title", "desc", "createdAt"])
-const todo41 = await Todo.findById("asd12eion12kdjlmn1").select({title: 1, desc: 1, createdAt: 1, _id: 0})
+const todo39 = await Todo.findById('asd12eion12kdjlmn1').select('title desc createdAt');
+const todo40 = await Todo.findById('asd12eion12kdjlmn1').select(['title', 'desc', 'createdAt']);
+const todo41 = await Todo.findById('asd12eion12kdjlmn1').select({
+  title: 1,
+  desc: 1,
+  createdAt: 1,
+  _id: 0,
+});
 // КСТАТИ, в таких же форматах можно указывать в findOne()
 // а что делает .projection()? То же самое, но только в последнем формате
 
 // ФИЛЬТРАЦИЯ
 // .find() - также принимает набор условий поиска, выдаёт массив нужных документов или пустой массив
-const todos4 = await Todo.find({ user: "Tilrait" });
+const todos4 = await Todo.find({ user: 'Tilrait' });
 // набор условий поиска тоже можно формировать по цепочке (КОНСТРУИРОВАНИЕ ЗАПРОСА)
-const todos5 = await Todo.find().where("user", "Tilrait").where("createdAt").lt(new Date(2026, 1, 19)).select("title desc createdAt")
+const todos5 = await Todo.find()
+  .where('user', 'Tilrait')
+  .where('createdAt')
+  .lt(new Date(2026, 1, 19))
+  .select('title desc createdAt');
 
 // СОРТИРОВКА
 // .sort() у объекта Query (до его await)
-const todos6 = await Todo.find(чтоТоИщемКакТо).sort(параметрыСортировки)
+const todos6 = await Todo.find(чтоТоИщемКакТо).sort(параметрыСортировки);
 // параметрыСортировки быват 3 видов:
 // 1) в виде объекта, где ключ - атрибут, значение - 1 или -1 ("asc", "desc")
-const todos7 = await Todo.find(чтоТоИщемКакТо).sort({done: 1, createdAt: "desc"})
+const todos7 = await Todo.find(чтоТоИщемКакТо).sort({ done: 1, createdAt: 'desc' });
 // 2) в виде строки с именами атрибутов через пробел. По умолчанию они будут по возрастанию, если хотим по убыванию, то добавляем дефис
-const todos8 = await Todo.find(чтоТоИщемКакТо).sort("done -createdAt")
+const todos8 = await Todo.find(чтоТоИщемКакТо).sort('done -createdAt');
 // 3) в виде массива, каждый элемент которого - массив из двух элементов - имя атрибута и направление
-const todos9 = await Todo.find(чтоТоИщемКакТо).sort([ ["done", 1], ["createdAt", "desc"] ])
+const todos9 = await Todo.find(чтоТоИщемКакТо).sort([
+  ['done', 1],
+  ['createdAt', 'desc'],
+]);
 
 // ВЫДАЧА ЧАСТИ ДОКУМЕНТОВ
 // .skip(номерПервогоДокументаДляВыдачи) - вернёт документы с определенного по счёту
@@ -1604,12 +1594,10 @@ const todos9 = await Todo.find(чтоТоИщемКакТо).sort([ ["done", 1],
 
 // КАК ПОЛУЧИТЬ КОЛИЧЕСТВО ЭЛЕМЕНТОВ
 
-
 // Агрегатные вычисления - Это расчет общего показателя (суммы, среднего, количества) для группы записей, имеющих что-то общее (например, расчет суммы продаж по каждому отдельному менеджеру).
 
-// Конвейер агрегатных вычислений — последовательность стадий, которые необходимо выполнить, чтобы произвести заданное агрегатное вычисление. 
+// Конвейер агрегатных вычислений — последовательность стадий, которые необходимо выполнить, чтобы произвести заданное агрегатное вычисление.
 // Стадия агрегатного вычисления — одна из операций, выполняемых СУБД для произведения агрегатного вычисления.
-
 
 // Стадии конвейера:
 // 1) фильтрация документов - отбор части документов из коллекции по какому-то условию
@@ -1630,28 +1618,27 @@ const todos9 = await Todo.find(чтоТоИщемКакТо).sort([ ["done", 1],
 // 3) фильтрация групп - по значению кол-ва, которое должно быть не менее 5
 // 4) сортировка групп - по убыванию значений кол-ва
 
-
 // Переходим на агрегатные вычисления в Mongoose
 // у модели есть статический метод aggregate(описаниеКонвейера)
 // описаниеКонвейера - массив. Каждый его элемент описывает одну из стадий. Одна стадия - объект, содержащий одно свойство, имя этого свойства определяет стадию
 
 // Стадия фильтрации документов в MongoDB и Mongoose:
 const aTodos = Todo.aggregate([
-  { $match: { done: true }},
+  { $match: { done: true } },
   // ещё стадия {},
   // ещё стадия {},
   // ещё стадия {},
   // ещё стадия {},
-])
+]);
 
 // Стадия сортировки документов в MongoDB и Mongoose:
 const aTodos2 = Todo.aggregate([
   // ещё стадия {},
-  { $sort: { createdAt: 1 }},
+  { $sort: { createdAt: 1 } },
   // ещё стадия {},
   // ещё стадия {},
   // ещё стадия {},
-])
+]);
 
 // Стадия формирования групп в MongoDB и Mongoose:
 // это стадия описывается объектом со свойством $group. Значение этого свойства - объект с двумя свойствами:
@@ -1660,18 +1647,18 @@ const aTodos2 = Todo.aggregate([
 const aTodos3 = Todo.aggregate([
   // ещё стадия {},
   // ещё стадия {},
-  { $group: { _id: "$user", cnt: { $count: {} } }},
+  { $group: { _id: '$user', cnt: { $count: {} } } },
   // ещё стадия {},
   // ещё стадия {},
-])
+]);
 
 const aTodos4 = Todo.aggregate([
   // ещё стадия {},
   // ещё стадия {},
-  { $group: { _id: "$done", cnt: { $count: {} } }},
+  { $group: { _id: '$done', cnt: { $count: {} } } },
   // ещё стадия {},
   // ещё стадия {},
-])
+]);
 
 // Поддерживаемые агрегатные вычисления:
 // { обозначениеВычисления: ссыдкаНаАтрибут | параметры }
@@ -1681,14 +1668,10 @@ const aTodos4 = Todo.aggregate([
 // $count - количетсво документов в группе. Указываем в него параметры в виде пустого обьекта.
 
 // $sum - сумма значений атрибута, ссылка на который была указана
-const agrRes1 = Product.aggregate([
-  { $group: { _id: "$category", sumPrice: { $sum: "$price" } } },
-]);
+const agrRes1 = Product.aggregate([{ $group: { _id: '$category', sumPrice: { $sum: '$price' } } }]);
 // $avg - среднее арифметическое
 // $min - наименьшее значение атрибута из заданной ссылки ($атрибут)
-const agrRes2 = Product.aggregate([
-  { $group: { _id: "$category", minPrice: { $min: "$price" } } },
-]);
+const agrRes2 = Product.aggregate([{ $group: { _id: '$category', minPrice: { $min: '$price' } } }]);
 // $max - наибольшее значение атрибута из заданной ссылки
 // $first - значение атрибута из ссылки у первого документа группы. Чаще всего используют после предварительной сортировки
 // $last - аналогично
@@ -1696,11 +1679,11 @@ const agrRes2 = Product.aggregate([
 const agrRes3 = Product.aggregate([
   {
     $group: {
-      _id: "$category",
+      _id: '$category',
       lastTitle: {
         $top: {
           sortBy: { createdAt: -1 },
-          output: "$title",
+          output: '$title',
         },
       },
     },
@@ -1709,23 +1692,21 @@ const agrRes3 = Product.aggregate([
 // $bottom - аналогично, но последний
 
 // Если мы хотим что-то подсчитать без группировки (например, сколько у нас всего дел):
-const aTodos5 = Todo.aggregate([
-  { $group: { _id: null, cnt: { $count: {} } } },
-]);
+const aTodos5 = Todo.aggregate([{ $group: { _id: null, cnt: { $count: {} } } }]);
 
 // Стадия фильтрации групп в MongoDB и Mongoose:
 const aTodos6 = Todo.aggregate([
-  { $group: { _id: "$user", cnt: { $count: {} } } },
+  { $group: { _id: '$user', cnt: { $count: {} } } },
   { $match: { cnt: { $gt: 5 } } },
 ]);
 
 // Стадия сортировки групп в MongoDB и Mongoose:
 const aTodos7 = Todo.aggregate([
-  { $group: { _id: "$user", cnt: { $count: {} } } },
+  { $group: { _id: '$user', cnt: { $count: {} } } },
   { $sort: { cnt: -1 } },
 ]);
 // Здесь мы создали группы без использования $group, затем отсортировали по убыванию количества документов в группе
-const aTodos8 = Todo.aggregate([{ $sortByCount: "$user" }]);
+const aTodos8 = Todo.aggregate([{ $sortByCount: '$user' }]);
 
 // Стадия выборки части групп в MongoDB и Mongoose:
 const aTodos9 = Todo.aggregate([
@@ -1754,15 +1735,15 @@ const todos = await aTodos;
 //   - as - имя атрибута текущего документа, в котором будет сохранен массив связанных документов
 
 const aTodos11 = Todo.aggregate([
-  { 
+  {
     $lookup: {
-      from: "users",
-      localField: "user",
-      foreignField: "_id",
-      as: "userObj"
-    } 
+      from: 'users',
+      localField: 'user',
+      foreignField: '_id',
+      as: 'userObj',
+    },
   },
-  { $group: { _id: "$userObj", cnt: { $count: {} } }}
+  { $group: { _id: '$userObj', cnt: { $count: {} } } },
 ]);
 
 // Получится, что у каждого дела есть поле userObj, которые хранит массив из одного элемента - пользователь (его документ)
@@ -1772,17 +1753,16 @@ const aTodos11 = Todo.aggregate([
 
 // имяАтрибутаВКоторомЛежитПоддокумент.имяАтрибутаПоддокумента
 const aTodos12 = Todo.aggregate([
-  { 
+  {
     $lookup: {
-      from: "users",
-      localField: "user",
-      foreignField: "_id",
-      as: "userObj"
-    } 
+      from: 'users',
+      localField: 'user',
+      foreignField: '_id',
+      as: 'userObj',
+    },
   },
-  { $group: { _id: "$userObj.username", cnt: { $count: {} } }}
+  { $group: { _id: '$userObj.username', cnt: { $count: {} } } },
 ]);
-
 
 // Стадия разворачивания массива:
 // эта стадия добавляется в конвейер ПОСЛЕ стадии связывания, ДО стадии группировки
@@ -1795,14 +1775,113 @@ const aTodos12 = Todo.aggregate([
 //      - preserveNullAndEmptyArrays - true/(false) - что делать, если массив пустой. ture - создаст единственный документ, где в этом атрибуте лежит null. false - документ не создастся
 
 const aTodos13 = Todo.aggregate([
-  { $lookup: "...." },
-  { $unwind: { path: "$userObj" } },
-  { $group: { _id: "$userObj.username", cnt: { $count: {} } }}
-])
+  { $lookup: '....' },
+  { $unwind: { path: '$userObj' } },
+  { $group: { _id: '$userObj.username', cnt: { $count: {} } } },
+]);
 
+// РАСШИРЕНИЕ МОДЕЛЕЙ
 
-// Создать функцию у модели дел getMostActiveUsers(). Она и будет выдавать списки наиболее активных пользователей.
-// Создать контроллер mostActiveUsers(), который выводит саму страницу. Будет передавать шаблону две вещи: список наиболее активных в контексте СОЗДАНИЯ, список наиболее активных в контексте ВЫПОЛНЕНИЯ
-// Создать шаблон most-active.ejs
-// Добавить в роутер маршрут на страницу
-// Добавить на панель навигации ссылку на эту страницу (видна ссылка только у вошедших).
+// Обычные методы:
+// Способ 1) После создания схемы
+
+// ФОРМАТ 1 - добавить один метод
+scUser.method('getTodos', async function () {
+  return await Todo.find({ user: this._id });
+});
+
+// ВАЖНО: именно у самого объекта, полученного с помощью модели, мы можем вызвать этот метод
+const user123 = await User.findById(req.user.id);
+const todosOfUser123 = user123.getTodos();
+
+// ФОРМАТ 2 - добавить несколько методов
+scUser.method({
+  async getTodos() {
+    return await Todo.find({ user: this._id });
+  },
+
+  async getTodo(id) {
+    return await Todo.findOne({ user: this._id, _id: id });
+  },
+});
+
+// Способ 2) Во время создания схемы
+const scUser = new Schema(
+  {
+    username: {
+      type: String,
+      index: true,
+    },
+    password: Buffer,
+    salt: Buffer,
+  },
+  {
+    versionKey: false,
+    methods: {
+      async getTodos() {
+        return await Todo.find({ user: this._id });
+      },
+
+      async getTodo(id) {
+        return await Todo.findOne({ user: this._id, _id: id });
+      },
+    },
+  },
+);
+
+// Статические методы моделей
+// Способ 1) После создания схемы
+
+scTodo.static('getTodo', async function (id, user) {
+  return await this.findOne({ _id: id, user: user });
+});
+
+// ВАЖНО: статический метод вызывается у самой модели
+const todo123123 = await Todo.getTodo(req.params.id, req.user.id);
+
+// Способ 2) Во время создания схемы
+const scTodo3123 = new Schema(
+  {
+    title: String,
+    desc: String,
+    addendum: String,
+    done: {
+      type: Boolean,
+      default: false,
+    },
+    createdAt: {
+      type: Date,
+      index: true,
+      default: () => new Date(),
+    },
+    user: {
+      type: Schema.Types.ObjectId,
+      index: true,
+    },
+  },
+  {
+    versionKey: false,
+    statics: {
+      async getTodo(id, user) {
+        return await this.findOne({ _id: id, user: user });
+      },
+    },
+  },
+);
+
+// Методы с условиями запроса
+const scTodo123 = new Schema(
+  {
+    // ...
+  },
+  {
+    // ...,
+    query: {
+      contains(attr, val) {
+        return this.where({ [attr]: new RegExp(val, 'i') });
+      },
+    },
+  },
+);
+
+const todos12312 = await Todo.find().contains('title', 'cs 1.6');

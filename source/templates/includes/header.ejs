@@ -15,12 +15,13 @@
       <div class="menu">
         <% if (req.user) { %>
         <a href="/todos"><span>Дела</span></a>
+        <a href="/mostactive">Смак</a>
         <a href="/todos/add" class="button">Добавить дело</a>
         <form action="/logout" method="post" class="horizontal">
-          <input type="submit" class="warning" value="Выйти">
+          <input type="submit" class="warning" value="Выйти" />
         </form>
         <form action="/delete" method="get" class="horizontal">
-          <input type="submit" class="warning" value="Удалить аккаунт">
+          <input type="submit" class="warning" value="Удалить аккаунт" />
         </form>
         <% } else { %>
         <a href="/login" class="button success">Войти</a>
