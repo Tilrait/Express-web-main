@@ -6,6 +6,7 @@ import {
   deleteItem,
   getMostActiveUsers,
 } from '../models/todos.js';
+import { getUsersCount } from '../models/users.js';
 import createError from 'http-errors';
 import { join } from 'path';
 import { rm } from 'fs/promises';
@@ -98,11 +99,13 @@ export function setOrder(req, res) {
 }
 
 export async function mostActiveUsers(req, res) {
+  const usersCount = await getUsersCount(); // Не совсем адекватно потом переделаем
   const result = await getMostActiveUsers();
-  console.log(result[0]);
   res.render('most-active', {
     title: 'Активные пользователи',
     mostActiveAll: result[0],
     mostActiveDone: result[1],
+    todosCount: result[2],
+    usersCount: usersCount,
   });
 }

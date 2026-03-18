@@ -48,6 +48,7 @@ export async function deleteAllUserTodosModel(userId) {
 
 export async function getMostActiveUsers() {
   const result = [];
+
   result.push(
     await Todo.aggregate([
       {
@@ -72,6 +73,7 @@ export async function getMostActiveUsers() {
       },
     ]),
   );
+
   result.push(
     await Todo.aggregate([
       {
@@ -101,6 +103,12 @@ export async function getMostActiveUsers() {
       },
     ]),
   );
+  // await Todo.find().estimatedDocumentCount(); можно и так
+  const count = await Todo.aggregate([
+    {
+      $group: { _id: null, cnt: { $count: {} } },
+    },
+  ]);
+  result.push(count[0].cnt);
   return result;
 }
-ƒ;
