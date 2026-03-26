@@ -6,6 +6,7 @@ import router from './source/router.js';
 import { error500Handler, mainErrorHandler } from './source/error-handlers.js';
 import cookieParser from 'cookie-parser';
 import { adminRouter, rootPath } from './source/admin/admin.js';
+import { requestToContext } from './source/middleware.js';
 
 config();
 
@@ -13,6 +14,10 @@ const port = process.env.PORT || 8000;
 const app = express();
 
 app.use(cookieParser());
+
+app.use(requestToContext);
+app.use(rootPath, adminRouter);
+
 app.use(urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
 
@@ -21,7 +26,6 @@ app.set('view engine', 'ejs');
 app.set('views', './source/templates');
 
 app.use('/', router);
-app.use(rootPath, adminRouter);
 
 app.use(mainErrorHandler, error500Handler);
 

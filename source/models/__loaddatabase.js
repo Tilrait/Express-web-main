@@ -25,6 +25,10 @@ const scTodo = new Schema(
         this.done = true;
         await this.save();
       },
+      async reopen() {
+        this.done = false;
+        await this.save();
+      },
     },
     statics: {
       async findOneAndSetDone(id, user) {

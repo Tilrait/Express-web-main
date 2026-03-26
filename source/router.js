@@ -16,7 +16,6 @@ import {
 } from './controllers/todos.js';
 import {
   handleErrors,
-  requestToContext,
   extendFlashAPI,
   getErrors,
   addendumWrapper,
@@ -43,7 +42,6 @@ const routerTodos = Router();
 // middlewares
 routerMain.use('/uploaded', staticMiddleware('storage/uploaded'));
 routerMain.use(staticMiddleware('public'));
-routerMain.use(requestToContext);
 routerMain.use(
   session({
     store: new FileStore({

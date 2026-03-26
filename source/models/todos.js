@@ -25,7 +25,11 @@ export async function addItem(todo) {
 }
 
 export async function setDoneItem(id, user) {
-  return await Todo.findOneAndSetDone();
+  return await Todo.findOneAndSetDone(id, user);
+}
+
+export async function setDoneUnsetDone(id) {
+  // if ()
 }
 
 export async function deleteItem(id, user) {

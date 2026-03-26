@@ -3,8 +3,10 @@ import AdminJSExpress from '@adminjs/express';
 import * as AdminJSMongoose from '@adminjs/mongoose';
 import { config } from 'dotenv';
 import { Todo, User } from '../models/__loaddatabase.js';
-import { pbkdf2Promisified } from '../utility.js';
+import { currentDir, pbkdf2Promisified } from '../utility.js';
 import { deleteAllUserTodosModel } from '../models/todos.js';
+import { rm } from 'fs/promises';
+import { join } from 'path';
 
 config();
 
@@ -39,7 +41,7 @@ const admin = new AdminJS({
             },
           },
         },
-        Action: {
+        actions: {
           edit: { isAccessible: false },
           new: {
             before: async (request) => {
@@ -106,6 +108,31 @@ const admin = new AdminJS({
             },
           },
         },
+        actions: {
+          delete: {
+            before: async (request, context) => {
+              const addendum = context.record.params.addendum;
+              if (addendum) await rm(join(currentDir, 'storage', 'uploaded', addendum));
+              return request;
+            },
+          },
+        },
+        actions: {
+          openCloseTask: {
+            actionType: 'record',
+            label: 'CheckCircle',
+            handler: async (request, response, context) => {
+              const { record, currentAdmin } = context;
+              const tId = request.params.recordId;
+              const todo = await Todo.findById(tId);
+              todo.reopen();
+              return {
+                record: record.toJSON(currentAdmin),
+                msg: 'Дело открыто',
+              };
+            },
+          },
+        },
       },
     },
   ],
@@ -140,6 +167,7 @@ const adminRouter = AdminJSExpress.buildAuthenticatedRouter(
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
+      maxAge: 30 * 60 * 60 * 24,
     },
   },
 );
