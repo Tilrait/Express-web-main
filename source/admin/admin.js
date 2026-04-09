@@ -7,8 +7,12 @@ import { currentDir, pbkdf2Promisified } from '../utility.js';
 import { deleteAllUserTodosModel } from '../models/todos.js';
 import { rm } from 'fs/promises';
 import { join } from 'path';
+import session from 'express-session';
+import FileStore from 'session-file-store';
 
 config();
+
+const storeFile = FileStore(session);
 
 const rootPath = '/admin';
 
@@ -18,6 +22,18 @@ AdminJS.registerAdapter({
 });
 
 const admin = new AdminJS({
+  locale: {
+    language: 'ru',
+    availableLanguages: ['ru'],
+    translations: {
+      ru: {
+        actions: {
+          reopenTodo: 'кс2',
+          closeTodo: 'кс го',
+        },
+      },
+    },
+  },
   resources: [
     // объект ресурса для пользователя
     {
@@ -107,6 +123,22 @@ const admin = new AdminJS({
               edit: true,
             },
           },
+          done: {
+            isVisible: {
+              list: true,
+              filter: true,
+              show: true,
+              edit: false,
+            },
+          },
+          doneAt: {
+            isVisible: {
+              list: true,
+              filter: false,
+              show: true,
+              edit: true,
+            },
+          },
         },
         actions: {
           delete: {
@@ -116,19 +148,53 @@ const admin = new AdminJS({
               return request;
             },
           },
-        },
-        actions: {
-          openCloseTask: {
+          reopenTodo: {
             actionType: 'record',
-            label: 'CheckCircle',
+            icon: 'Refresh',
+            component: false,
+            isAccessible: () => true,
+            isVisible: (context) => {
+              return context.record.param('done') === true;
+            },
             handler: async (request, response, context) => {
-              const { record, currentAdmin } = context;
+              const { record, resource, currentAdmin, h } = context;
               const tId = request.params.recordId;
               const todo = await Todo.findById(tId);
               todo.reopen();
+              const updatedRecord = await record.update({ done: false, doneAt: null });
               return {
-                record: record.toJSON(currentAdmin),
-                msg: 'Дело открыто',
+                record: updatedRecord.toJSON(currentAdmin),
+                notice: { message: 'Дело переоткрыто', type: 'success' },
+                redirectUrl: h.recordActionUrl({
+                  resourceId: resource.id(),
+                  recordId: tId,
+                  actionName: 'show',
+                }),
+              };
+            },
+          },
+          closeTodo: {
+            actionType: 'record',
+            icon: 'Check',
+            component: false,
+            isAccessible: () => true,
+            isVisible: (context) => {
+              return context.record.param('done') !== true;
+            },
+            handler: async (request, response, context) => {
+              const { record, resource, currentAdmin, h } = context;
+              const tId = request.params.recordId;
+              const todo = await Todo.findById(tId);
+              todo.setDone();
+              const updatedRecord = await record.update({ done: true, doneAt: todo.doneAt });
+              return {
+                record: updatedRecord.toJSON(currentAdmin),
+                notice: { message: 'Дело закрыто', type: 'success' },
+                redirectUrl: h.recordActionUrl({
+                  resourceId: resource.id(),
+                  recordId: tId,
+                  actionName: 'show',
+                }),
               };
             },
           },
@@ -162,6 +228,13 @@ const adminRouter = AdminJSExpress.buildAuthenticatedRouter(
   },
   null,
   {
+    store: new storeFile({
+      path: './storage/admin-sessions',
+      reapAsync: true,
+      reapSyncFallback: true,
+      logFn: () => {},
+    }),
+    name: 'adminjs',
     secret: process.env.ADMINJS_SESSION_SECRET || 'adminjs-session-secret',
     resave: false,
     saveUninitialized: false,

@@ -28,8 +28,8 @@ export async function setDoneItem(id, user) {
   return await Todo.findOneAndSetDone(id, user);
 }
 
-export async function setDoneUnsetDone(id) {
-  // if ()
+export async function reopenItem(id) {
+  return await Todo.findOneAndReopen(id);
 }
 
 export async function deleteItem(id, user) {

@@ -14,6 +14,11 @@ const scTodo = new Schema(
       index: true,
       default: () => new Date(),
     },
+    doneAt: {
+      type: Date,
+      index: true,
+      default: null,
+    },
     user: {
       type: Schema.Types.ObjectId,
     },
@@ -23,10 +28,12 @@ const scTodo = new Schema(
     methods: {
       async setDone() {
         this.done = true;
+        this.doneAt = new Date();
         await this.save();
       },
       async reopen() {
         this.done = false;
+        this.doneAt = null;
         await this.save();
       },
     },
@@ -34,6 +41,11 @@ const scTodo = new Schema(
       async findOneAndSetDone(id, user) {
         const todo = await this.findOne({ _id: id, user: user });
         if (todo) await todo.setDone();
+        return todo;
+      },
+      async findOneAndReopen(id, user) {
+        const todo = await this.findOne({ _id: id, user: user });
+        if (todo) await todo.reopen();
         return todo;
       },
     },
