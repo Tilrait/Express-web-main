@@ -773,7 +773,7 @@ function getFileToSave(req, res) {
 // Что происходит при выходе? Понятно
 
 // ХЕШИРОВАНИЕ
-import { pbkdf2, randomBytes } from 'crypto';
+import { pbkdf2, randomBytes, verify } from 'crypto';
 // import { pbkdf2Sync } from "crypto";
 
 pbkdf2(хешируемый_пароль, соль, количество_итераций, длина_хеша, обозначение_алгоритма, колбэк);
@@ -1947,3 +1947,76 @@ if (req.accepts('text/html')) {
 else {
 }
 // Запрос пришел от фронтенда, поскольку запрашивает json (скорее всего)
+
+// Инструменты express для получения от пользователя данных в формате JSON
+import express, { json } from 'express';
+
+const app = express();
+app.use(json({}));
+
+// Какие у нее есть параметры
+// strict - (true): только массивы и объекты, false: произвольные
+// limit: максимально допустимый объем данных
+// limit: 1024 - 1024 байт
+// inflate - (true): то будут поддерживаться сжатые и несжатые json данные, false - только несжатые
+
+// Инструменты mongoose для преобразование документов в JSON
+const todo01 = await Todo.findOne({ _id: req.params.id });
+todo01.toJSON({ versionKey: false }); // - мы не получаем json строку, мы получаем объект пригодный для превращение через JSON.
+// параметры объекта
+// flattenObjectIds - true: Преобразуй id в строку, false: оставь как есть
+// aliases - (true): помещает alias атрибутов документа в результат, false: нет
+// virtual - та же тема для виртуальных атрибутов (false)
+// getters - та же тема для геттеров (false)
+// versionKey - та же тема для текущей ревизии документа (true)
+
+// JWT - JSON WEB TOKEN
+import jwt from 'jsonwebtoken';
+
+// 2 функции нам понадобятся
+// 1) sign() - генерирует жетон на основе данных о пользователе
+jwt.sign($сведениеОпользователе$, $секретныйКлюч$, параметры, колбэк);
+
+// про параметры - объект:
+// expiresIn - время действия жетона
+// notBefore - время ДО которого жетон не актуален
+// algorithm - алгоритм генерации жетона
+
+// Если колбэк не передан, то sign() выполняется как синхронная функция, возвращает строковый жетон
+jwt.sign({ username: req.user.name }, 'easrgdthfydg', { expiresIn: '1w' });
+// Если колбэк ПЕРЕДАН, то sign() выполняется как асинхронная/
+// колбэк должен принимать 2 параметра:
+jwt.sign({ username: req.user.name }, 'easrgdthfydg', { expiresIn: '1w' }, (err, token) => {
+  if (err) {
+  }
+  // обрабатываем
+  else {
+  }
+  // работаем с жетоном
+});
+
+// 2) verify() - извлекает из жетона сведения о юзере
+jwt.verify($жетон$, $секретныйКлюч$, параметры, колбэк);
+
+// интересные параметры:
+// ignoreExpiration - true/(false) - игнорировать ли просрочку
+// maxAge - макс время актуальности жетона
+// clockTolerance - (0) погрешность времени в секундах для выяснения актуальности
+// algorithms
+
+// если колбэк не задан, то это синхронная функция которая вернет исходные данные о пользователе
+const userObj01 = jwt.verify(token, 'easrgdthfydg', { clockTolerance: 10 });
+// если колбэк задан - асинхронная
+jwt.sign(token, 'easrgdthfydg', { clockTolerance: '10' }, (err, userObj) => {
+  if (err) {
+  }
+  // обрабатываем
+  else {
+  }
+  // работаем с жетоном
+});
+
+// cors - обработка между сайтовых запросов
+// между сайтовых клиентский запрос пришедший бэкенду с фронтенда загруженного с другого серверного хоста (ip)
+import cors from 'cors';
+app.use(cors());
