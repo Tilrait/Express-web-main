@@ -17,14 +17,17 @@ export function infoPage(req, res) {
     title: 'Информация',
   });
 }
-// doneAtLast будем получать с помощью get параметра из за проблемы с доступом к чужим cookie
+
 export async function mainPage(req, res, next) {
   try {
-    let list = await getListTodos(req.user.id, req.cookies.doneAtLast, req.query.search);
+    let list = await getListTodos(req.user.id, req.query.doneAtLast, req.query.search);
 
-    res.render('main', {
+    // res.render('main', {
+    //   todos: list,
+    //   title: 'Главная',
+    // });
+    res.json({
       todos: list,
-      title: 'Главная',
     });
   } catch (err) {
     next(err);
@@ -38,9 +41,8 @@ export async function detailPage(req, res, next) {
       throw createError(404, 'Запрошенное дело не существует');
     }
 
-    res.render('detail', {
-      title: toDoObject.title,
-      item: toDoObject,
+    res.json({
+      item: toDoObject.toJSON(),
     });
   } catch (err) {
     next(err);
@@ -65,7 +67,8 @@ export async function add(req, res, next) {
     if (req.file) todo.addendum = req.file.filename;
 
     await addItem(todo);
-    res.redirect(req.baseUrl);
+    res.status(201);
+    res.end();
   } catch (err) {
     next(err);
   }
@@ -74,7 +77,8 @@ export async function add(req, res, next) {
 export async function setDone(req, res, next) {
   try {
     if (await setDoneItem(req.params.id, req.user.id)) {
-      res.redirect('back');
+      res.status(202);
+      res.end();
     } else {
       throw createError(404, 'Запрошенное дело не существует');
     }
@@ -88,7 +92,8 @@ export async function remove(req, res, next) {
     const t = await deleteItem(req.params.id, req.user.id);
     if (!t) throw createError(404, 'Запрошенное дело не существует');
     if (t.addendum) await rm(join(currentDir, 'storage', 'uploaded', t.addendum));
-    res.redirect('back');
+    res.status(204);
+    res.end();
   } catch (err) {
     next(err);
   }
@@ -103,8 +108,14 @@ export async function remove(req, res, next) {
 export async function mostActiveUsers(req, res) {
   const usersCount = await getUsersCount(); // Не совсем адекватно потом переделаем
   const result = await getMostActiveUsers();
-  res.render('most-active', {
-    title: 'Активные пользователи',
+  // res.render('most-active', {
+  //   title: 'Активные пользователи',
+  //   mostActiveAll: result[0],
+  //   mostActiveDone: result[1],
+  //   todosCount: result[2],
+  //   usersCount: usersCount,
+  // });
+  res.json({
     mostActiveAll: result[0],
     mostActiveDone: result[1],
     todosCount: result[2],
