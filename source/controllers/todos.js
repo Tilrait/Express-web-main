@@ -17,7 +17,7 @@ export function infoPage(req, res) {
     title: 'Информация',
   });
 }
-
+// doneAtLast будем получать с помощью get параметра из за проблемы с доступом к чужим cookie
 export async function mainPage(req, res, next) {
   try {
     let list = await getListTodos(req.user.id, req.cookies.doneAtLast, req.query.search);
@@ -47,11 +47,12 @@ export async function detailPage(req, res, next) {
   }
 }
 
-export function addPage(req, res) {
-  res.render('add', {
-    title: 'Добавление дела',
-  });
-}
+// не понадобится
+// export function addPage(req, res) {
+//   res.render('add', {
+//     title: 'Добавление дела',
+//   });
+// }
 
 export async function add(req, res, next) {
   try {
@@ -93,10 +94,11 @@ export async function remove(req, res, next) {
   }
 }
 
-export function setOrder(req, res) {
-  res.cookie('doneAtLast', req.body.done_at_last);
-  res.redirect('back');
-}
+// Должны будем удалить его, окажется не нужным.
+// export function setOrder(req, res) {
+//   res.cookie('doneAtLast', req.body.done_at_last);
+//   res.redirect('back');
+// }
 
 export async function mostActiveUsers(req, res) {
   const usersCount = await getUsersCount(); // Не совсем адекватно потом переделаем
