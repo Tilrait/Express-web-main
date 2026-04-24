@@ -15,7 +15,8 @@ function createSessionAndLogin(req, res, next, user) {
         if (err) {
           next(err);
         } else {
-          res.redirect('/');
+          res.status(200);
+          res.end();
         }
       });
     }
@@ -23,7 +24,9 @@ function createSessionAndLogin(req, res, next, user) {
 }
 
 export function registerPage(req, res) {
-  res.render('register', { title: 'Регистрация' });
+  // res.render('register', { title: 'Регистрация' });
+  res.status(200);
+  res.end();
 }
 
 export async function register(req, res, next) {
@@ -46,7 +49,7 @@ export async function register(req, res, next) {
 }
 
 export function loginPage(req, res) {
-  res.render('login', { title: 'Вход' });
+  // res.render('login', { title: 'Вход' });
 }
 
 export function login(req, res, next) {
