@@ -12,12 +12,6 @@ import { join } from 'path';
 import { rm } from 'fs/promises';
 import { currentDir } from '../utility.js';
 
-export function infoPage(req, res) {
-  res.render('info', {
-    title: 'Информация',
-  });
-}
-
 export async function mainPage(req, res, next) {
   try {
     let list = await getListTodos(req.user.id, req.query.doneAtLast, req.query.search);
@@ -106,7 +100,7 @@ export async function remove(req, res, next) {
 // }
 
 export async function mostActiveUsers(req, res) {
-  const usersCount = await getUsersCount(); // Не совсем адекватно потом переделаем
+  const usersCount = await getUsersCount();
   const result = await getMostActiveUsers();
   // res.render('most-active', {
   //   title: 'Активные пользователи',

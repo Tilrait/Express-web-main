@@ -2006,7 +2006,7 @@ jwt.verify($жетон$, $секретныйКлюч$, параметры, ко�
 // если колбэк не задан, то это синхронная функция которая вернет исходные данные о пользователе
 const userObj01 = jwt.verify(token, 'easrgdthfydg', { clockTolerance: 10 });
 // если колбэк задан - асинхронная
-jwt.sign(token, 'easrgdthfydg', { clockTolerance: '10' }, (err, userObj) => {
+jwt.verify(token, 'easrgdthfydg', { clockTolerance: '10' }, (err, userObj) => {
   if (err) {
   }
   // обрабатываем

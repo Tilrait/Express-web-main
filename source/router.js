@@ -1,91 +1,54 @@
 import { Router, static as staticMiddleware } from 'express';
-import session from 'express-session';
-import _FileStore from 'session-file-store';
-import { flash } from 'express-flash-message';
-
 import {
   detailPage,
   mainPage,
-  infoPage,
-  addPage,
-  add,
   setDone,
   remove,
-  setOrder,
   mostActiveUsers,
+  add,
 } from './controllers/todos.js';
 import {
   handleErrors,
-  extendFlashAPI,
-  getErrors,
-  addendumWrapper,
   loadCurrentUser,
   isGuest,
   isLoggedIn,
+  addendumWrapper,
 } from './middleware.js';
-import { todoV, registerV, loginV, removeAccountV } from './validators.js';
-import {
-  loginPage,
-  login,
-  register,
-  registerPage,
-  logout,
-  deleteUser,
-  confirmDeletePage,
-} from './controllers/users.js';
-
-const FileStore = _FileStore(session);
+import { registerV, loginV, removeAccountV, todoV } from './validators.js';
+import { login, register, deleteUser } from './controllers/users.js';
+import cors from 'cors';
 
 const routerMain = Router();
 const routerTodos = Router();
 
-// middlewares
-routerMain.use('/uploaded', staticMiddleware('storage/uploaded'));
-routerMain.use(staticMiddleware('public'));
 routerMain.use(
-  session({
-    store: new FileStore({
-      path: './storage/sessions',
-      reapAsync: true,
-      reapSyncFallback: true,
-      logFn: () => {},
-    }),
-    secret: process.env.SESSION_SECRET || 'DEV-SECRET-CHANGAN-ME',
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      maxAge: 1000 * 60 * 60,
-    },
+  cors({
+    origin: true,
+    credentials: true,
   }),
 );
-routerMain.use(flash({ sessionKeyName: 'flash-message' }));
-routerMain.use(extendFlashAPI);
+
+// middlewares
+routerMain.use('/uploaded', staticMiddleware('storage/uploaded'));
+
 routerMain.use(loadCurrentUser);
 
-routerMain.get('/register', isGuest, getErrors, registerPage);
 routerMain.post('/register', isGuest, registerV, handleErrors, register);
-routerMain.get('/login', isGuest, getErrors, loginPage);
 routerMain.post('/login', isGuest, loginV, handleErrors, login);
-
-routerMain.get('/', infoPage);
 
 routerMain.use(isLoggedIn);
 
 routerMain.use('/todos', routerTodos);
-routerMain.post('/logout', logout);
 
-routerMain.get('/delete', getErrors, confirmDeletePage);
 routerMain.post('/delete', removeAccountV, handleErrors, deleteUser);
 
 routerMain.get('/mostactive', mostActiveUsers);
 
 // /todos routes
-routerTodos.get('/add', getErrors, addPage);
-routerTodos.post('/add', addendumWrapper, todoV, handleErrors, add);
+routerTodos.post('/', addendumWrapper, todoV, handleErrors, add);
 routerTodos.get('/:id', detailPage);
 routerTodos.put('/:id', setDone);
 routerTodos.delete('/:id', remove);
 routerTodos.get('/', mainPage);
-routerTodos.post('/', setOrder);
 
 export default routerMain;
