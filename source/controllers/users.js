@@ -29,8 +29,8 @@ export async function login(req, res) {
 
 export async function deleteUser(req, res, next) {
   try {
-    await deleteAllUserTodosModel(req.session.user.id);
-    await deleteUserModel(req.session.user.id);
+    await deleteAllUserTodosModel(req.user._id);
+    await deleteUserModel(req.user._id);
     res.status(204);
     res.end();
   } catch (err) {

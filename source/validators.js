@@ -80,20 +80,15 @@ const removeAccountV = [
     .withMessage("Не указан пароль")
     .custom(async (value, { req }) => {
       if (req.user) {
-        const deleteInfo = await getUser(req.user.name);
-        const savedPasswordHash = deleteInfo.password;
-        const salt = Buffer.from(deleteInfo.salt);
         const passwordHash = await pbkdf2Promisified(
           value,
-          salt,
+          req.user.salt,
           100000,
           32,
           "sha256"
         );
-        if (timingSafeEqual(savedPasswordHash, passwordHash)) return true;
+        if (timingSafeEqual(req.user.password, passwordHash)) return true;
         else throw new Error("Неправильный пароль");
-      } else if (!username) {
-        throw new Error("Не правильно");
       }
     }),
 ];
