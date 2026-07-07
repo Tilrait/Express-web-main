@@ -374,7 +374,7 @@ app.use(
       fallbackSessionFn: () => {
         return {};
       },
-      logFn: () => {},
+      logFn: () => { },
     }),
     secret: 'abcdefgh',
     resave: false,
@@ -573,7 +573,7 @@ const uploadHandler7 = multer({
   // ...
   fileFilter: fileFilter,
 }) // 1) single("имя параметра") - возвращает посредник, сохраняющий ЕДИНСТВЕННЫЙ файл // Объект uploadHandler содержит 5 методов: // ____________________________________________________________________________________________________ // buffer - содержимое файла в виде объекта класса Buffer из JS // ЕСЛИ используется MemoryStorage, то ещё: // path - destination + filename (строка суммарная) // destination - путь к папке, в которой сохранится // filename - имя, под которым будет сохранён файл (генерируется параметром filename у DiskStorage) // ЕСЛИ используется DiskStorage, то ещё: // encoding - кодировка файла // fieldname - имя POST-параметра, который содержал наш файл // mimetype - MIME-type файла https://ru.wikipedia.org/wiki/Список_MIME-типов // size - размер файла в байтах // originalname - изначальное имя файла // ПРО свойства объекта file
-`<form action="/add" method="post" enctype="multipart/form-data">
+  `<form action="/add" method="post" enctype="multipart/form-data">
   ...
   <label>Иллюстрация</label>
   <input type="file" name="addendum">
@@ -2019,3 +2019,225 @@ jwt.verify(token, 'easrgdthfydg', { clockTolerance: '10' }, (err, userObj) => {
 // между сайтовых клиентский запрос пришедший бэкенду с фронтенда загруженного с другого серверного хоста (ip)
 import cors from 'cors';
 app.use(cors());
+
+
+
+// Кэширование
+
+// Кэширование статики
+import { static as staticMiddleware } from "express";
+
+app.use(staticMiddleware("public", {
+  maxAge: "1y 1m 2w 5d 5h 5m", // время жизни кэшированной копии 
+  immutable: true, // если true, то никогда не проверять актуальность, даже если вышел срок жизни (данные неизменяются никогда)
+  lastModified: true, // Добавляет заголовок Last-Modified с временем последнего изменения файла на диске (браузер будет эту дату отправлять обратно в If-Modified-Since)
+  etag: true, // Добавляет заголовок ETag с хешем файла (браузер будет отправлять этот хэш в заголовке If-None-Match)
+}))
+
+// Браузер впервые запросил файл - бэк отвечает с заголовками: 
+//  Cache - Control: max - age = 123123, immutable,
+//  Last-Modified: дата_изменения_файла
+
+// Если immutable выключен и прошло время max-age, то браузер отправит заголовок If-Modified-Since: дата-изменения-файла
+
+// Если файл не изменился, сервер ответит 304, браузер возьмет ресурс из кэша.
+
+
+
+// Кэширование динамических ресурсов
+
+// Для динамики Express автоматически вычисляет и добавляет ETag
+app.set("etag", значения)
+// Какие есть значения: 
+// - true или 'weak' - слабый ETag (по умолчанию). Возможны коллизии, чаще всего "сойдет".
+// - 'strong' - сильные ETag, вычисляются дольше, коллизии невозможны.
+// - false - не отправлять и не считать ETag.
+
+// как проверить актуальность кэша на бэке в обработчике ?
+req.fresh // свойство запроса, которое уже знает, "свежий" ли еще кэш (true/false)
+req.stale // свойство запроса, которое уже знает, "устаревший" ли кэш
+
+function detailPage(req, res) {
+  if (req.fresh) {
+
+  } else {
+
+  }
+}
+
+
+// Express-cache-ctrl
+// иногда мы можем захотеть явные предписания клиенту:
+// - не кэшируй это вообще
+// - кэшируй но только для этого пользователя, а не на прокси сервере
+// - кэшируй на час
+// - прокси могут кэшировать
+
+// в теории мы можем установить любые заголовки любому ответу сами:
+res.set("Cache-Control", "...")
+// npm install express-cache-ctrl
+import { disable, secure, private, public, custom } from "express-cache-ctrl"
+
+// disable - полный запрет кэширования (клиентам)
+app.use("/secret", disable())
+
+// secure - полный запрет кэширования (клиентам и прокси)
+app.use("/payment", secure())
+
+// private - кэшируют клиенты, но не кэшируют прокси
+// У него есть параметры
+//  - срок кэширования: "1h"
+app.use('/profile', private("2h"))
+// 2) Дополнительные параметры в видео обьекта:
+//  - mustRevalidate - перепроверять, когда время вышло всегда
+//  - noTransform - true будет запрещать проксям модифицировать ответ
+app.use("/profile", private("2h", { mustRevalidate: true }))
+
+// public - кэширют все
+app.use("/profile", public("30m", { sttl: "1h" })) // 30 - на браузере, 1 час - на прокси
+
+// custom - свободные настройки. Там много настроек, нагуглить
+
+
+// Кэширование шаблонов
+app.enable("view cache")
+app.disable("view cache")
+// или
+app.set("view cache", true)
+
+
+// кэширование любых данных
+// cache-manager
+import { caching } from 'cache-manager';
+// асинхронная функция, которая создает обьект кэша. Этот обьект имеет методы для сохранения, получения и удаления данных.
+
+const cache = await caching(типХранилища, обьектПараметров)
+
+// тип хранилища:
+//  - "memory" - хранилище в оперативе
+//  - функция, которая создает обьект хранилища
+
+// обьект параметров:
+// - max - максимальное кол-во значений в кэше
+// - ttl - предельный срок храненния в милисекундах
+
+const cache = await caching("memory", {
+  max: 50,
+  ttl: 60 * 1000
+})
+
+
+// методы: 
+cache.set("todos", await Todo.find({ user: user })) // сохранить в кэш
+// "todos" - название обьекта в кэше, а второй параметр - его значение
+
+const todos = await cache.get("todos") // Получить данные
+
+await cache.del("todos") // удаляет из кэша
+
+// есть такие же методы для массивов: mset, mget, mdel
+await cache.mset([
+  ["todos", await Todo.find({ user: user })],
+  ["users", await useResolvedPath.find({})],
+])
+
+const [todos, users] = await cache.mget(["todos", "users"])
+
+await cache.mdel(["todos", "users"])
+
+//cache-manager-fs-hash - нужна, чтобы избежать потерь кэша при перезагрузке сервера
+import { create as fsStoreCreate } from "cache-manager-fs-hash"
+
+const cache = await caching(fsStoreCreate, {
+  max: 50,
+  ttl: 60 * 1000,
+  path: "./storage/cache",
+  maxsize: 1024 * 1024
+})
+
+// В обьект параметров мы можем добавить еще дополнительные параметры:
+// - path - путь к папке, кототрая будет сохранять файлы кэша
+// - subdirs - true/(false) - сохранять ли во вложенных папках
+// - maxsize - максимально допустимый суммарный размер файлов
+
+// Сжатие ответов
+import compression from 'compression';
+
+app.use(compression());
+
+
+// 1) Реализовать сжатие ответов в нашем приложении 
+// 2) Нужно реализовать кэширование на стороне клиента страницы сведений о каждом деле на 1 час с требованием обязательной проверки в случае устаревания и запретом кэширования прокси-серверам
+
+
+
+
+// Helmet для защиты от некоторых сетевых атак
+
+// CSRF (Cross-Site Request Forgery)
+// Чтобы защититься нужны жетоны защиты (CSRF-токены)
+// npm i tiny-csrf
+
+// для его использования нужны посредники:
+//  - urlencoded (или multer для файлов)
+//  - Cookie-parser
+//  - express-session
+
+
+import { urlencoded } from 'express';
+import cookieParser from 'cookie-parser';
+import session from 'express-session';
+import csrf from 'tiny-csrf';
+
+app.use(urlencoded({ extended: true }))
+app, use(cookieParser("adfsgwgwrvxz"))
+app.use(
+  session({
+    // тут типа настройки сессий, которые не будем повторять
+  })
+)
+
+const csrfProtector = csrf("secretKeyOffForms")
+
+routerMain.get("/login", csrfProtector, loginPage);
+routerMain.post("/login", csrfProtector, login)
+
+
+// При получении запроса:
+//  - с помощью метода GET:
+//  Контроллер 
+function loginPage(req, res) {
+  res.render("login", {
+    csrfToken: req.csrfToken()
+  })
+}
+
+
+// Шаблон ejs:
+<form action='/login' method='post'>
+  <input type='hidden' name='_csrf' value='<%= csrfToken %>' />
+  {/* Все остальные поля */}
+</form>
+//  - c помощью метода POST происходит обработка токена через csrfProtector
+
+// Защита БД MongoDB
+// 1) Создание суперадмина
+// 1.1 подключиться в базе admin (стандартная)
+// 1.2 создать суперадмина там 
+db.createUser(
+  {
+    user: "admin",
+    pwd: "12345678",
+    roles: [
+      { role: "userAdminAnyDatabase", db: "admin" },
+      { role: "readWriteAnyDatabase", db: "admin" }
+    ]
+  }
+)
+// 1.3 добавить в конфиг монго 
+security:
+authorization: enabled
+// 1.4. перезапустить монго
+
+// 2) Создание обчных пользователей
+// 3) Привязка их к моделям (суперадмин нужен на крайняк и чтобы управлять другими)

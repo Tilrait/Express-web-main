@@ -113,6 +113,6 @@ export async function getMostActiveUsers() {
       $group: { _id: null, cnt: { $count: {} } },
     },
   ]);
-  result.push(count[0].cnt);
+  result.push(count[0]?.cnt ?? 0);
   return result;
 }

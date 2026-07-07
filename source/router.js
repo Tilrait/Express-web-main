@@ -36,13 +36,16 @@ routerMain.use(loadCurrentUser);
 routerMain.post('/register', isGuest, registerV, handleErrors, register);
 routerMain.post('/login', isGuest, loginV, handleErrors, login);
 
+
+routerMain.get('/mostactive', mostActiveUsers);
+
+
 routerMain.use(isLoggedIn);
 
 routerMain.use('/todos', routerTodos);
 
 routerMain.post('/delete', removeAccountV, handleErrors, deleteUser);
 
-routerMain.get('/mostactive', mostActiveUsers);
 
 // /todos routes
 routerTodos.post('/', addendumWrapper, todoV, handleErrors, add);

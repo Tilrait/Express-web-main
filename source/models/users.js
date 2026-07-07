@@ -19,5 +19,5 @@ export async function getUsersCount() {
       $group: { _id: null, cnt: { $count: {} } },
     },
   ]);
-  return result[0].cnt;
+  return result[0]?.cnt ?? 0;
 }

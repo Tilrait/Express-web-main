@@ -115,5 +115,4 @@ export async function mostActiveUsers(req, res) {
     todosCount: result[2],
     usersCount: usersCount,
   });
-  ƒ;
 }
