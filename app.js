@@ -3,7 +3,7 @@ import { config } from 'dotenv';
 import './source/models/__loaddatabase.js';
 import router from './source/router.js';
 import { error500Handler, mainErrorHandler } from './source/error-handlers.js';
-import { adminRouter, rootPath } from './source/admin/admin.js';]
+import { adminRouter, rootPath } from './source/admin/admin.js';
 import helmet from 'helmet';
 
 config();

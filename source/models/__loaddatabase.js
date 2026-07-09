@@ -1,7 +1,8 @@
+import { config } from 'dotenv';
 import { connect, Schema, model } from 'mongoose';
-
-const uri = process.env.URI || 'mongodb://127.0.0.1:27017';
-const dbname = process.env.DBNAME || 'todos';
+config()
+const uri = process.env.URI || 'mongodb://127.0.0.1:27017/todos';
+console.log(uri)
 
 const scTodo = new Schema(
   {
@@ -73,6 +74,6 @@ const scUser = new Schema(
   },
 );
 
-await connect(uri, { dbname: dbname });
+await connect(uri);
 export const Todo = model('Todo', scTodo);
 export const User = model('User', scUser);
