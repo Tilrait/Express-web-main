@@ -2241,3 +2241,122 @@ authorization: enabled
 
 // 2) Создание обчных пользователей
 // 3) Привязка их к моделям (суперадмин нужен на крайняк и чтобы управлять другими)
+
+// Журналирование
+// IP-адрес клиента
+// HTTP-метод
+// Путь запроса
+// Наборы GET и POST параметров
+// Время
+// Время обработки
+// Статус код ответа
+// Размер ответа
+
+// MORGAN
+// npm install morgan
+import morgan from "morgan"
+
+const app = express()
+
+app.use(morgan("dev"))
+
+// Собственный формат лога
+app.use(morgan(":a b: ... :c"))
+
+// :remote-addr - IP клиента        192.168.1.1
+// :method - HTTP-метод             GET, POST
+// :url - запрашиваемый адрес       /api/users?id=5
+// :http-version - версия HTTP      1.1, 2.0
+// :status - код статуса ответа     200, 404, 500
+// :res[заголовок-ответа]           :res[content-lenght] - 1024
+// :req[заголовок-запроса]          :req[Authorization] - Bearer asfwekjhfbuh32yrih87
+// :referrer - страница-источник    https://bank.com/page1
+// :user-agent - данные клиента     Mozilla/5.0 (Windows NT 10.0; Win64; x64) ...
+// :response-time[2] - время ответа 31.56
+// :total-time[2] - полное время    54.72
+// :date[web] - текущее время       Tue, 10 Oct 2000 13:55:36 GMT (форматы - clf, iso, web)
+
+app.use(morgan(":method :url :status :res[content-length] :total-time"))
+// GET - /users 200 1685 5.123
+
+
+// Создание своего предопределенного формата
+import morgan, { format } from 'morgan';
+format("my_log", ":method :url :status :res[content-length] :total-time")
+app.use(morgan("my_log"))
+
+// Создание собственного "токена" (:что-то)
+import morgan, { token } from 'morgan';
+token("boman-запрос", (req, res) => {
+  return req.method = "GET" ? "просит страницу" : "иди отсюда";
+})
+
+app.use(morgan(":url :method :boman-запрос"))
+// /users GET  иди отсюда
+
+// Параметров вывода
+app.use(morgan("format", {
+  // объект параметров
+}))
+
+// Какие есть параметры
+// 1) skip
+app.use(morgan("web", {
+  skip: (req, res) => res.statusCode === 304
+})) // журнал будет скипать запросы с 304 кодом (закешированные и не измененные)
+
+// 2) immediate
+app.use(morgan("web", {
+  immediate: false
+})) // если false (по умолчанию) - запись в журнал только при отправке ответа (все данные готовы)
+
+app.use(morgan("web", {
+  immediate: true
+})) // если true - запись создается сразу при получении ответа (полезно, когда возникает ошибка при генерации ответа и мы хотим залогировать исходные данные)
+
+
+// 3) stream - поток для вывода в журнал, про него далее
+
+// Сохранения журналов в файлы
+// 1) Запись в один файл
+// 2) Ротация журналов
+
+// Запись в один файл
+import { createWriteStream } from 'fs';
+import { join } from 'path';
+import { currentDir } from './source/utility';
+
+const logStream = createWriteStream(join(currentDir, "storage", "logs", "main.log", {
+  flags: "a" // дозаписывание потока
+}))
+
+app.use(morgan("web", {
+  stream: logStream
+}))
+
+// Ротация журналов (каждые несколько дней или часов создавать новый файл лога, а старые архивировать)
+// npm install rotating-file-stream
+import { createStream } from 'rotating-file-stream';
+import { join } from 'path';
+import morgan from 'morgan';
+
+const rotatingStream = createStream("main.log", {
+  path: join(currentDir, "storage", "logs"), // путь к папке для логов
+  interval: "1d", // интервал создавания нового лога
+  size: "10M", // если файл больше 10MB, то создай новый лог (даже если время не вышло)
+  maxFiles: 30, // хранить только 30 последних архивированных логов, остальные удалять
+  maxSize: "1G", // максильманый размер архивов
+  compress: "gzip" // отвечает за сжатие журналов. По умолчанию не сжимает, можно указать свой компрессор или gzip алгоритм
+})
+
+app.use(morgan("web", {
+  stream: rotatingStream
+}))
+
+// Архивные файлы журнала сохраняются так - <год><номер месяца><число><часы><минуты><порядковый номер файла><базовое имя>
+// 20260713-2107-01-main.log
+
+
+
+// Задание
+//   Реализовать журналирование, формат записей и параметры - любые, но лучше почти с каждым поработать.
