@@ -2,7 +2,6 @@ import { config } from 'dotenv';
 import { connect, Schema, model } from 'mongoose';
 config()
 const uri = process.env.URI || 'mongodb://127.0.0.1:27017/todos';
-console.log(uri)
 
 const scTodo = new Schema(
   {

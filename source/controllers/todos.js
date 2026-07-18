@@ -8,9 +8,19 @@ import {
 } from '../models/todos.js';
 import { getUsersCount } from '../models/users.js';
 import createError from 'http-errors';
+import { createCache } from 'cache-manager';
+import { DiskStore } from 'cache-manager-fs-hash';
 import { join } from 'path';
 import { rm } from 'fs/promises';
 import { currentDir } from '../utility.js';
+
+const DETAIL_TTL_MS = 60 * 60 * 1000;
+
+const detailCache = createCache(DiskStore, {
+  ttl: DETAIL_TTL_MS,
+  Path: join(currentDir, 'storage', 'cache'),
+  zip: true,
+})
 
 export async function mainPage(req, res, next) {
   try {
@@ -30,14 +40,27 @@ export async function mainPage(req, res, next) {
 
 export async function detailPage(req, res, next) {
   try {
-    const toDoObject = await getItem(req.params.id, req.user.id);
-    if (!toDoObject) {
-      throw createError(404, 'Запрошенное дело не существует');
+    if (req.fresh) {
+      console.log("fresh")
+      res.status(304).end()
+      return;
     }
 
-    res.json({
-      item: toDoObject.toJSON(),
-    });
+    const cacheKey = `${req.user._id}:${req.params.id}`;
+    let body = await detailCache.get(cacheKey);
+    console.log(await detailCache)
+    console.log("not fresh")
+    if (!body) {
+
+      const toDoObject = await getItem(req.params.id, req.user.id);
+      if (!toDoObject) {
+        throw createError(404, 'Запрошенное дело не существует');
+      }
+      body = { item: toDoObject.toJSON() };
+      await detailCache.set(cacheKey, body, DETAIL_TTL_MS);
+    }
+
+    res.json(body);
   } catch (err) {
     next(err);
   }
@@ -71,6 +94,7 @@ export async function add(req, res, next) {
 export async function setDone(req, res, next) {
   try {
     if (await setDoneItem(req.params.id, req.user.id)) {
+      await detailCache.del(`${req.user._id}:${req.params.id}`);
       res.status(202);
       res.end();
     } else {
@@ -85,6 +109,7 @@ export async function remove(req, res, next) {
   try {
     const t = await deleteItem(req.params.id, req.user.id);
     if (!t) throw createError(404, 'Запрошенное дело не существует');
+    await detailCache.del(`${req.user._id}:${req.params.id}`);
     if (t.addendum) await rm(join(currentDir, 'storage', 'uploaded', t.addendum));
     res.status(204);
     res.end();

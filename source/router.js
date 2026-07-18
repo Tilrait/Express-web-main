@@ -1,4 +1,5 @@
 import { Router, static as staticMiddleware } from 'express';
+import { private as cachePrivate, disable as cacheDisable } from 'express-cache-ctrl';
 import {
   detailPage,
   mainPage,
@@ -29,7 +30,10 @@ routerMain.use(
 );
 
 // middlewares
-routerMain.use('/uploaded', staticMiddleware('storage/uploaded'));
+routerMain.use('/uploaded', staticMiddleware('storage/uploaded', {
+  maxAge: '1y', // отправляет заголовок в ответе cache-control: max-age=...
+  lastModified: true,
+}));
 
 routerMain.use(loadCurrentUser);
 
@@ -42,6 +46,8 @@ routerMain.get('/mostactive', mostActiveUsers);
 
 routerMain.use(isLoggedIn);
 
+routerMain.use(cacheDisable()); // отправляет заголовок Cache-Control: no-Cache, no-Store, must-revalidate
+
 routerMain.use('/todos', routerTodos);
 
 routerMain.post('/delete', removeAccountV, handleErrors, deleteUser);
@@ -49,7 +55,11 @@ routerMain.post('/delete', removeAccountV, handleErrors, deleteUser);
 
 // /todos routes
 routerTodos.post('/', addendumWrapper, todoV, handleErrors, add);
-routerTodos.get('/:id', detailPage);
+routerTodos.get(
+  '/:id',
+  cachePrivate('1h', { mustRevalidate: true }),
+  detailPage
+);
 routerTodos.put('/:id', setDone);
 routerTodos.delete('/:id', remove);
 routerTodos.get('/', mainPage);

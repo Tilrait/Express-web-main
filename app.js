@@ -1,4 +1,5 @@
 import express, { urlencoded } from 'express';
+import compression from "compression";
 import { config } from 'dotenv';
 import './source/models/__loaddatabase.js';
 import router from './source/router.js';
@@ -11,9 +12,12 @@ config();
 const port = process.env.PORT || 8000;
 const app = express();
 
-app.use(helmet())
+app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }))
+app.set("etag", "strong")
 
 app.use(rootPath, adminRouter);
+
+app.use(compression());
 
 app.use(urlencoded({ extended: true }));
 
