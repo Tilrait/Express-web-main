@@ -2,6 +2,8 @@ import { Router, static as staticMiddleware } from 'express';
 import session from 'express-session';
 import _FileStore from 'session-file-store';
 import { flash } from 'express-flash-message';
+import { config } from 'dotenv';
+import csrf from "tiny-csrf"
 
 import {
   detailPage,
@@ -34,10 +36,14 @@ import {
   confirmDeletePage,
 } from './controllers/users.js';
 
+config();
+
 const FileStore = _FileStore(session);
+
 
 const routerMain = Router();
 const routerTodos = Router();
+const csrfProtector = csrf(process.env.CSRF_SECRET)
 
 // middlewares
 routerMain.use('/uploaded', staticMiddleware('storage/uploaded'));
@@ -48,7 +54,7 @@ routerMain.use(
       path: './storage/sessions',
       reapAsync: true,
       reapSyncFallback: true,
-      logFn: () => {},
+      logFn: () => { },
     }),
     secret: process.env.SESSION_SECRET || 'DEV-SECRET-CHANGAN-ME',
     resave: false,
@@ -62,10 +68,10 @@ routerMain.use(flash({ sessionKeyName: 'flash-message' }));
 routerMain.use(extendFlashAPI);
 routerMain.use(loadCurrentUser);
 
-routerMain.get('/register', isGuest, getErrors, registerPage);
-routerMain.post('/register', isGuest, registerV, handleErrors, register);
-routerMain.get('/login', isGuest, getErrors, loginPage);
-routerMain.post('/login', isGuest, loginV, handleErrors, login);
+routerMain.get('/register', isGuest, csrfProtector, getErrors, registerPage);
+routerMain.post('/register', isGuest, csrfProtector, registerV, handleErrors, register);
+routerMain.get('/login', isGuest, csrfProtector, getErrors, loginPage);
+routerMain.post('/login', isGuest, csrfProtector, loginV, handleErrors, login);
 
 routerMain.get('/', infoPage);
 

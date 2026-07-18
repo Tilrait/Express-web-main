@@ -374,7 +374,7 @@ app.use(
       fallbackSessionFn: () => {
         return {};
       },
-      logFn: () => {},
+      logFn: () => { },
     }),
     secret: 'abcdefgh',
     resave: false,
@@ -573,7 +573,7 @@ const uploadHandler7 = multer({
   // ...
   fileFilter: fileFilter,
 }) // 1) single("имя параметра") - возвращает посредник, сохраняющий ЕДИНСТВЕННЫЙ файл // Объект uploadHandler содержит 5 методов: // ____________________________________________________________________________________________________ // buffer - содержимое файла в виде объекта класса Buffer из JS // ЕСЛИ используется MemoryStorage, то ещё: // path - destination + filename (строка суммарная) // destination - путь к папке, в которой сохранится // filename - имя, под которым будет сохранён файл (генерируется параметром filename у DiskStorage) // ЕСЛИ используется DiskStorage, то ещё: // encoding - кодировка файла // fieldname - имя POST-параметра, который содержал наш файл // mimetype - MIME-type файла https://ru.wikipedia.org/wiki/Список_MIME-типов // size - размер файла в байтах // originalname - изначальное имя файла // ПРО свойства объекта file
-`<form action="/add" method="post" enctype="multipart/form-data">
+  `<form action="/add" method="post" enctype="multipart/form-data">
   ...
   <label>Иллюстрация</label>
   <input type="file" name="addendum">
@@ -2020,3 +2020,6 @@ jwt.sign(token, 'easrgdthfydg', { clockTolerance: '10' }, (err, userObj) => {
 // между сайтовых клиентский запрос пришедший бэкенду с фронтенда загруженного с другого серверного хоста (ip)
 import cors from 'cors';
 app.use(cors());
+
+// Генерация ключей
+// node -e "console.log(require('crypto').randomBytes(16).toString('hex'))"

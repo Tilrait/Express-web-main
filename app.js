@@ -13,7 +13,7 @@ config();
 const port = process.env.PORT || 8000;
 const app = express();
 
-app.use(cookieParser());
+app.use(cookieParser(process.env.COOKIE_SECRET || "cookie-secret-prod"));
 
 app.use(requestToContext);
 app.use(rootPath, adminRouter);

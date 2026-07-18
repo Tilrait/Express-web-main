@@ -23,7 +23,10 @@ function createSessionAndLogin(req, res, next, user) {
 }
 
 export function registerPage(req, res) {
-  res.render('register', { title: 'Регистрация' });
+  res.render('register', {
+    title: 'Регистрация',
+    csrfToken: req.csrfToken()
+  });
 }
 
 export async function register(req, res, next) {
@@ -42,11 +45,13 @@ export async function register(req, res, next) {
   } catch (err) {
     next(err);
   }
-  // тут сохранить сессию по данным, которые выше получили в addUser
 }
 
 export function loginPage(req, res) {
-  res.render('login', { title: 'Вход' });
+  res.render('login', {
+    title: 'Вход',
+    csrfToken: req.csrfToken()
+  });
 }
 
 export function login(req, res, next) {
