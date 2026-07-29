@@ -41,15 +41,12 @@ export async function mainPage(req, res, next) {
 export async function detailPage(req, res, next) {
   try {
     if (req.fresh) {
-      console.log("fresh")
       res.status(304).end()
       return;
     }
 
     const cacheKey = `${req.user._id}:${req.params.id}`;
     let body = await detailCache.get(cacheKey);
-    console.log(await detailCache)
-    console.log("not fresh")
     if (!body) {
 
       const toDoObject = await getItem(req.params.id, req.user.id);
